@@ -1,3 +1,5 @@
+import { contaParaMedia } from "@/lib/roles";
+
 export interface MetricRecord {
   id: string;
   vehicleId: string;
@@ -8,6 +10,9 @@ export interface MetricRecord {
   data: Date;
   km: number;
   litros: number;
+  combustivel: string;
+  origem: string;
+  valorTotal: number | null;
 }
 
 export interface VehicleAgg {
@@ -35,8 +40,14 @@ export interface FleetMetrics {
   kmRodado: number;
   litrosTotal: number;
   litrosConsumo: number;
+  litrosInterno: number;
+  litrosExterno: number;
+  valorTotal: number;
   media: number | null;
   registros: number;
+  outrosProdutosLitros: number;
+  outrosProdutosValor: number;
+  outrosProdutosRegistros: number;
 }
 
 export function monthKey(date: Date): string {
@@ -50,13 +61,14 @@ export function monthKey(date: Date): string {
  * abastecimento no início do período filtrado ainda tenha seu KM anterior
  * de referência. O primeiro abastecimento de cada veículo nunca tem delta
  * (não há referência anterior), mas seus litros ainda contam no total
- * abastecido.
+ * abastecido. Registros de "outros produtos" (Arla, lubrificante) nunca
+ * geram delta de KM nem entram no denominador da média — apenas somam no
+ * total de litros/valor desses produtos, à parte.
  */
 interface Delta {
   record: MetricRecord;
   kmRodado: number;
   litrosConsumo: number;
-  isFirstOfVehicle: boolean;
 }
 
 function computeDeltas(allRecords: MetricRecord[]): Delta[] {
@@ -69,14 +81,19 @@ function computeDeltas(allRecords: MetricRecord[]): Delta[] {
   const deltas: Delta[] = [];
   for (const records of byVehicle.values()) {
     const sorted = [...records].sort((a, b) => a.data.getTime() - b.data.getTime());
-    for (let i = 0; i < sorted.length; i++) {
-      if (i === 0) {
-        deltas.push({ record: sorted[i], kmRodado: 0, litrosConsumo: 0, isFirstOfVehicle: true });
+    let previousComKm: MetricRecord | null = null;
+    for (const record of sorted) {
+      if (!contaParaMedia(record.combustivel)) {
+        deltas.push({ record, kmRodado: 0, litrosConsumo: 0 });
         continue;
       }
-      const raw = sorted[i].km - sorted[i - 1].km;
-      const kmRodado = raw > 0 ? raw : 0;
-      deltas.push({ record: sorted[i], kmRodado, litrosConsumo: sorted[i].litros, isFirstOfVehicle: false });
+      if (!previousComKm) {
+        deltas.push({ record, kmRodado: 0, litrosConsumo: 0 });
+      } else {
+        const raw = record.km - previousComKm.km;
+        deltas.push({ record, kmRodado: raw > 0 ? raw : 0, litrosConsumo: record.litros });
+      }
+      previousComKm = record;
     }
   }
   return deltas;
@@ -87,6 +104,22 @@ function inPeriod(date: Date, months: Set<string> | null): boolean {
   return months.has(monthKey(date));
 }
 
+function emptyFleet(): FleetMetrics {
+  return {
+    kmRodado: 0,
+    litrosTotal: 0,
+    litrosConsumo: 0,
+    litrosInterno: 0,
+    litrosExterno: 0,
+    valorTotal: 0,
+    media: null,
+    registros: 0,
+    outrosProdutosLitros: 0,
+    outrosProdutosValor: 0,
+    outrosProdutosRegistros: 0,
+  };
+}
+
 export function computeMetrics(
   allRecords: MetricRecord[],
   months: Set<string> | null,
@@ -95,10 +128,18 @@ export function computeMetrics(
 
   const vehicleMap = new Map<string, VehicleAgg>();
   const monthMap = new Map<string, MonthAgg>();
-  const fleet: FleetMetrics = { kmRodado: 0, litrosTotal: 0, litrosConsumo: 0, media: null, registros: 0 };
+  const fleet = emptyFleet();
 
   for (const d of deltas) {
     const { record } = d;
+
+    if (!contaParaMedia(record.combustivel)) {
+      fleet.outrosProdutosLitros += record.litros;
+      fleet.outrosProdutosValor += record.valorTotal ?? 0;
+      fleet.outrosProdutosRegistros += 1;
+      continue;
+    }
+
     const vKey = record.vehicleId;
     if (!vehicleMap.has(vKey)) {
       vehicleMap.set(vKey, {
@@ -132,7 +173,10 @@ export function computeMetrics(
     fleet.kmRodado += d.kmRodado;
     fleet.litrosTotal += record.litros;
     fleet.litrosConsumo += d.litrosConsumo;
+    fleet.valorTotal += record.valorTotal ?? 0;
     fleet.registros += 1;
+    if (record.origem === "INTERNO") fleet.litrosInterno += record.litros;
+    else fleet.litrosExterno += record.litros;
   }
 
   for (const v of vehicleMap.values()) {
@@ -163,4 +207,37 @@ export function ranking(byVehicle: VehicleAgg[], limit = 5) {
   const melhores = [...elegiveis].sort((a, b) => (b.media ?? 0) - (a.media ?? 0)).slice(0, limit);
   const piores = [...elegiveis].sort((a, b) => (a.media ?? 0) - (b.media ?? 0)).slice(0, limit);
   return { melhores, piores };
+}
+
+export interface CivilPeriodTotals {
+  hoje: number;
+  semana: number;
+  mes: number;
+  ano: number;
+}
+
+function startOfUTCDay(d: Date) {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+/** KM rodado por período civil (hoje/semana/mês/ano), sempre com base em todo o histórico. */
+export function computeCivilPeriodTotals(allRecords: MetricRecord[], now = new Date()): CivilPeriodTotals {
+  const deltas = computeDeltas(allRecords).filter((d) => contaParaMedia(d.record.combustivel));
+
+  const hojeInicio = startOfUTCDay(now);
+  const diaSemana = now.getUTCDay();
+  const semanaInicio = new Date(hojeInicio);
+  semanaInicio.setUTCDate(semanaInicio.getUTCDate() - diaSemana);
+  const mesInicio = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const anoInicio = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+
+  const totals: CivilPeriodTotals = { hoje: 0, semana: 0, mes: 0, ano: 0 };
+  for (const d of deltas) {
+    const t = d.record.data.getTime();
+    if (t >= anoInicio.getTime()) totals.ano += d.kmRodado;
+    if (t >= mesInicio.getTime()) totals.mes += d.kmRodado;
+    if (t >= semanaInicio.getTime()) totals.semana += d.kmRodado;
+    if (t >= hojeInicio.getTime()) totals.hoje += d.kmRodado;
+  }
+  return totals;
 }

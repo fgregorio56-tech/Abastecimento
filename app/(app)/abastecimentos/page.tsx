@@ -81,15 +81,16 @@ export default async function AbastecimentosPage({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[820px] text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <th className="px-3 py-2">Placa</th>
               <th className="px-3 py-2">Data</th>
               <th className="px-3 py-2 text-right">KM</th>
               <th className="px-3 py-2 text-right">Litros</th>
               <th className="px-3 py-2">Combustível</th>
+              <th className="px-3 py-2">Origem</th>
               <th className="px-3 py-2">Posto</th>
               <th className="px-3 py-2">Situação</th>
               {canEdit && <th className="px-3 py-2">Ações</th>}
@@ -98,7 +99,7 @@ export default async function AbastecimentosPage({
           <tbody className="px-3">
             {records.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-slate-500">
+                <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
                   Nenhum abastecimento encontrado.
                 </td>
               </tr>
@@ -111,6 +112,7 @@ export default async function AbastecimentosPage({
                 km: r.km,
                 litros: r.litros,
                 combustivel: r.combustivel,
+                origem: r.origem,
                 posto: r.posto,
                 hasError: r.hasError,
                 errors: JSON.parse(r.errors) as string[],

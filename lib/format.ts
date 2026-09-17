@@ -18,6 +18,11 @@ export function formatMedia(value: number | null): string {
   return value === null ? "—" : `${formatNumber(value, 2)} km/l`;
 }
 
+export function formatCurrency(value: number | null): string {
+  if (value === null || Number.isNaN(value)) return "—";
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 const MESES_PT = [
   "janeiro",
   "fevereiro",

@@ -45,10 +45,10 @@ export default async function MetasPage() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <th className="px-3 py-2">Placa</th>
               <th className="px-3 py-2">Marca / Modelo / Ano</th>
               <th className="px-3 py-2 text-right">KM atual</th>
@@ -87,7 +87,7 @@ export default async function MetasPage() {
         </table>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+      <div className="rounded-xl border border-brand-100 bg-slate-50 p-4 text-xs text-slate-500">
         <p>
           <strong>Diferença</strong> compara a média atual do veículo com a meta:
           valores positivos (verde) indicam que o veículo está rendendo mais km por

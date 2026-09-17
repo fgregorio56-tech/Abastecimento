@@ -20,7 +20,7 @@ export function UploadForm() {
           type="file"
           accept=".xlsx,.xls,.csv"
           required
-          className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+          className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
         />
       </div>
 
@@ -31,7 +31,7 @@ export function UploadForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-fit rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+        className="w-fit rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
       >
         {pending ? "Importando..." : "Importar planilha"}
       </button>

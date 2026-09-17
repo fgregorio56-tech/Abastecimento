@@ -10,6 +10,9 @@ export async function getValidRecordsForMetrics(): Promise<MetricRecord[]> {
       data: true,
       km: true,
       litros: true,
+      combustivel: true,
+      origem: true,
+      valorTotal: true,
       vehicle: { select: { placa: true, marca: true, modelo: true, anoModelo: true } },
     },
   });
@@ -27,6 +30,9 @@ export async function getValidRecordsForMetrics(): Promise<MetricRecord[]> {
       data: r.data,
       km: r.km,
       litros: r.litros,
+      combustivel: r.combustivel,
+      origem: r.origem,
+      valorTotal: r.valorTotal,
     });
   }
   return result;

@@ -8,11 +8,18 @@ import { validateRecordFields, validateVehicleSequence } from "@/lib/validation"
 export async function revalidateVehicleRecords(vehicleId: string) {
   const records = await prisma.fuelRecord.findMany({
     where: { vehicleId },
-    select: { id: true, placaTexto: true, data: true, km: true, litros: true },
+    select: { id: true, placaTexto: true, data: true, km: true, litros: true, combustivel: true },
   });
 
   const sequenceErrors = validateVehicleSequence(
-    records.map((r) => ({ id: r.id, placaTexto: r.placaTexto, data: r.data, km: r.km, litros: r.litros })),
+    records.map((r) => ({
+      id: r.id,
+      placaTexto: r.placaTexto,
+      data: r.data,
+      km: r.km,
+      litros: r.litros,
+      combustivel: r.combustivel,
+    })),
   );
 
   await prisma.$transaction(

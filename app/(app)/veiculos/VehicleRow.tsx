@@ -62,7 +62,7 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
           </label>
         </td>
         <td className="flex gap-2 px-3 py-2">
-          <button onClick={save} disabled={isPending} className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+          <button onClick={save} disabled={isPending} className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60">
             Salvar
           </button>
           <button onClick={() => setEditing(false)} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50">

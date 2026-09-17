@@ -14,11 +14,17 @@ consumo, ranking de veículos e metas de média por veículo.
 - **Validação automática**: cada abastecimento é validado (placa, data, km,
   litragem, duplicidade, KM regressivo, salto de KM incoerente) e os
   registros com erro ficam sinalizados para correção manual.
-- **Correção**: edição in-line de placa, data, km e litragem diretamente na
-  tela de Abastecimentos, com revalidação automática.
+- **Correção**: edição in-line de placa, data, km, litragem, combustível e
+  origem (interno/externo) diretamente na tela de Abastecimentos, com
+  revalidação automática.
+- **Pendências**: tela dedicada que reúne abastecimentos com erro e veículos
+  sem cadastro completo (marca/modelo), com contador no menu.
+- **Ticket Log**: histórico de todas as importações, correções, exclusões e
+  alterações de usuários/veículos/metas feitas no sistema.
 - **Painel de análise**: filtro por todo o período, um mês ou vários meses;
-  KM rodado total, litros abastecidos, média geral da frota, gráficos
-  mensais e ranking dos melhores/piores veículos por média (km/l).
+  KM rodado (hoje/semana/mês/ano), litros, valor total, consumo interno vs.
+  externo, outros produtos (Arla 32, lubrificantes — não entram no cálculo
+  de km/l), média da frota (meta x real) e melhores/piores desempenhos.
 - **Metas de consumo**: meta sugerida por veículo com base na mediana de
   consumo de veículos semelhantes (marca/modelo), ajustada pela idade do
   veículo e pela quilometragem rodada — sempre editável manualmente.
@@ -65,3 +71,11 @@ sem alterações em qualquer um dos provedores compatíveis com o Prisma).
 - `npm run lint` — checagem de lint
 - `npx prisma studio` — explorar o banco de dados
 - `npx prisma db seed` — (re)criar o usuário mestre inicial
+
+## Logos no cabeçalho
+
+O cabeçalho tem um espaço reservado (`app/(app)/LogoBadge.tsx`) para as logos
+dos grupos parceiros (RETEC e Grupo GVC), hoje com um selo de texto como
+placeholder. Para usar as imagens reais, salve os arquivos em `public/`
+(ex.: `public/logo-retec.png`, `public/logo-gvc.png`) e troque o conteúdo de
+`LogoBadge.tsx` por `<img src="/logo-retec.png" ... />`.

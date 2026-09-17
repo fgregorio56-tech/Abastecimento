@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { deleteFuelRecord, updateFuelRecord } from "./actions";
 import { ERROR_LABELS } from "@/lib/validation";
 import { formatDate, formatKm, formatLitros } from "@/lib/format";
+import { FUEL_TYPES, FUEL_TYPE_LABELS, ORIGENS, ORIGEM_LABELS } from "@/lib/roles";
 
 export interface RowData {
   id: string;
@@ -13,6 +14,7 @@ export interface RowData {
   km: number | null;
   litros: number | null;
   combustivel: string;
+  origem: string;
   posto: string | null;
   hasError: boolean;
   errors: string[];
@@ -34,11 +36,13 @@ export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }
   const [data, setData] = useState(toDateInputValue(row.data));
   const [km, setKm] = useState(row.km?.toString() ?? "");
   const [litros, setLitros] = useState(row.litros?.toString() ?? "");
+  const [combustivel, setCombustivel] = useState(row.combustivel);
+  const [origem, setOrigem] = useState(row.origem);
 
   function save() {
     setError(null);
     startTransition(async () => {
-      const result = await updateFuelRecord(row.id, { placa, data, km, litros });
+      const result = await updateFuelRecord(row.id, { placa, data, km, litros, combustivel, origem });
       if (!result.ok) {
         setError(result.error ?? "Erro ao salvar.");
         return;
@@ -90,7 +94,32 @@ export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }
             className="w-20 rounded border border-slate-300 px-2 py-1 text-right text-sm"
           />
         </td>
-        <td className="py-2 pr-2 text-slate-500">{row.combustivel}</td>
+        <td className="py-2 pr-2">
+          <select
+            value={combustivel}
+            onChange={(e) => setCombustivel(e.target.value)}
+            className="rounded border border-slate-300 px-1 py-1 text-xs"
+          >
+            {FUEL_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {FUEL_TYPE_LABELS[t]}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td className="py-2 pr-2">
+          <select
+            value={origem}
+            onChange={(e) => setOrigem(e.target.value)}
+            className="rounded border border-slate-300 px-1 py-1 text-xs"
+          >
+            {ORIGENS.map((o) => (
+              <option key={o} value={o}>
+                {ORIGEM_LABELS[o]}
+              </option>
+            ))}
+          </select>
+        </td>
         <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
         <td className="py-2 pr-2 text-xs text-red-600">
           {error}
@@ -99,7 +128,7 @@ export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }
           <button
             onClick={save}
             disabled={isPending}
-            className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+            className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           >
             Salvar
           </button>
@@ -121,7 +150,16 @@ export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }
       <td className="py-2 pr-2 text-slate-600">{formatDate(row.data ? new Date(row.data) : null)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.km)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatLitros(row.litros)}</td>
-      <td className="py-2 pr-2 text-slate-500">{row.combustivel}</td>
+      <td className="py-2 pr-2 text-slate-500">{FUEL_TYPE_LABELS[row.combustivel as keyof typeof FUEL_TYPE_LABELS] ?? row.combustivel}</td>
+      <td className="py-2 pr-2">
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+            row.origem === "INTERNO" ? "bg-teal-100 text-teal-800" : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {ORIGEM_LABELS[row.origem as keyof typeof ORIGEM_LABELS] ?? row.origem}
+        </span>
+      </td>
       <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
       <td className="py-2 pr-2">
         {row.hasError ? (

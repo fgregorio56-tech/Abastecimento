@@ -22,6 +22,7 @@ model User {
   importBatches     ImportBatch[]
   fuelRecordsCreated FuelRecord[]  @relation("FuelRecordCreatedBy")
   fuelRecordsUpdated FuelRecord[]  @relation("FuelRecordUpdatedBy")
+  activityLogs      ActivityLog[]
 }
 
 model Vehicle {
@@ -55,7 +56,8 @@ model ImportBatch {
   fuelRecords FuelRecord[]
 }
 
-// Combustivel: "DIESEL" | "DIESEL_S10" | "GASOLINA" | "ETANOL" | "GNV" | "ARLA" | "OUTRO" (ver lib/roles.ts)
+// Combustivel: "DIESEL" | "DIESEL_S10" | "GASOLINA" | "ETANOL" | "GNV" | "ARLA" | "LUBRIFICANTE" | "OUTRO" (ver lib/roles.ts)
+// Origem: "INTERNO" | "EXTERNO" (ver lib/roles.ts)
 model FuelRecord {
   id          String   @id @default(cuid())
   placaTexto  String
@@ -68,6 +70,7 @@ model FuelRecord {
   valorTotal  Float?
   posto       String?
   combustivel String   @default("DIESEL")
+  origem      String   @default("EXTERNO")
   motorista   String?
   observacao  String?
 
@@ -89,4 +92,17 @@ model FuelRecord {
   @@index([vehicleId])
   @@index([data])
   @@index([hasError])
+}
+
+// Tipo: "IMPORTACAO" | "CORRECAO" | "EXCLUSAO" | "VEICULO" | "META" | "USUARIO" (ver lib/roles.ts)
+model ActivityLog {
+  id          String   @id @default(cuid())
+  tipo        String
+  descricao   String
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([tipo])
 }

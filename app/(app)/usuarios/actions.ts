@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { ROLES, type Role } from "@/lib/roles";
+import { ROLES, ROLE_LABELS, type Role } from "@/lib/roles";
+import { logActivity } from "@/lib/activityLog";
 
 export interface UserActionResult {
   ok: boolean;
@@ -17,7 +18,7 @@ export async function createUser(
   _prevState: CreateUserState,
   formData: FormData,
 ): Promise<CreateUserState> {
-  await requireRole("MASTER");
+  const me = await requireRole("MASTER");
 
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -42,7 +43,10 @@ export async function createUser(
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.user.create({ data: { name, email, passwordHash, role } });
 
+  await logActivity("USUARIO", `Criou o usuário ${name} (${ROLE_LABELS[role]})`, me.id);
+
   revalidatePath("/usuarios");
+  revalidatePath("/ticket-log");
   return { ok: true };
 }
 
@@ -52,8 +56,11 @@ export async function toggleUserActive(userId: string, active: boolean): Promise
     return { ok: false, error: "Você não pode desativar seu próprio usuário." };
   }
 
-  await prisma.user.update({ where: { id: userId }, data: { active } });
+  const target = await prisma.user.update({ where: { id: userId }, data: { active } });
+  await logActivity("USUARIO", `${active ? "Ativou" : "Desativou"} o usuário ${target.name}`, me.id);
+
   revalidatePath("/usuarios");
+  revalidatePath("/ticket-log");
   return { ok: true };
 }
 
@@ -66,21 +73,27 @@ export async function changeUserRole(userId: string, role: Role): Promise<UserAc
     return { ok: false, error: "Perfil inválido." };
   }
 
-  await prisma.user.update({ where: { id: userId }, data: { role } });
+  const target = await prisma.user.update({ where: { id: userId }, data: { role } });
+  await logActivity("USUARIO", `Alterou o perfil de ${target.name} para ${ROLE_LABELS[role]}`, me.id);
+
   revalidatePath("/usuarios");
+  revalidatePath("/ticket-log");
   return { ok: true };
 }
 
 export async function resetUserPassword(userId: string, newPassword: string): Promise<UserActionResult> {
-  await requireRole("MASTER");
+  const me = await requireRole("MASTER");
 
   if (newPassword.length < 8) {
     return { ok: false, error: "A senha deve ter pelo menos 8 caracteres." };
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
-  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  const target = await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+
+  await logActivity("USUARIO", `Redefiniu a senha do usuário ${target.name}`, me.id);
 
   revalidatePath("/usuarios");
+  revalidatePath("/ticket-log");
   return { ok: true };
 }

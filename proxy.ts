@@ -33,5 +33,7 @@ export const config = {
     "/usuarios/:path*",
     "/exportar/:path*",
     "/metas/:path*",
+    "/pendencias/:path*",
+    "/ticket-log/:path*",
   ],
 };

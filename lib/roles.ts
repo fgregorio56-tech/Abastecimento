@@ -22,6 +22,7 @@ export const FUEL_TYPES = [
   "ETANOL",
   "GNV",
   "ARLA",
+  "LUBRIFICANTE",
   "OUTRO",
 ] as const;
 export type FuelType = (typeof FUEL_TYPES)[number];
@@ -33,5 +34,40 @@ export const FUEL_TYPE_LABELS: Record<FuelType, string> = {
   ETANOL: "Etanol",
   GNV: "GNV",
   ARLA: "Arla 32",
+  LUBRIFICANTE: "Lubrificante",
   OUTRO: "Outro",
+};
+
+/** Tipos que não representam combustível de propulsão — não entram no cálculo de km/l. */
+export const PRODUTOS_FORA_DO_KML: FuelType[] = ["ARLA", "LUBRIFICANTE"];
+
+export function contaParaMedia(combustivel: string): boolean {
+  return !PRODUTOS_FORA_DO_KML.includes(combustivel as FuelType);
+}
+
+export const ORIGENS = ["EXTERNO", "INTERNO"] as const;
+export type Origem = (typeof ORIGENS)[number];
+
+export const ORIGEM_LABELS: Record<Origem, string> = {
+  EXTERNO: "Externo (posto)",
+  INTERNO: "Interno (frota)",
+};
+
+export const ACTIVITY_TYPES = [
+  "IMPORTACAO",
+  "CORRECAO",
+  "EXCLUSAO",
+  "VEICULO",
+  "META",
+  "USUARIO",
+] as const;
+export type ActivityType = (typeof ACTIVITY_TYPES)[number];
+
+export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
+  IMPORTACAO: "Importação",
+  CORRECAO: "Correção",
+  EXCLUSAO: "Exclusão",
+  VEICULO: "Veículo",
+  META: "Meta",
+  USUARIO: "Usuário",
 };

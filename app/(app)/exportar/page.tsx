@@ -61,12 +61,12 @@ export default async function ExportarPage({
 
       <PeriodFilter availableMonths={months} selectedMonths={selectedMonths ? [...selectedMonths] : null} />
 
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-brand-100 bg-white p-4">
         <Link
           href={toggleCorrigidosHref}
           className={`rounded-lg px-3 py-2 text-sm font-medium ${
             somenteCorrigidos
-              ? "bg-blue-600 text-white"
+              ? "bg-brand-600 text-white"
               : "border border-slate-300 text-slate-700 hover:bg-slate-50"
           }`}
         >
@@ -94,7 +94,7 @@ export default async function ExportarPage({
       {totalComErro > 0 && (
         <p className="text-sm text-slate-500">
           Existem abastecimentos com erro no período selecionado. Corrija-os na tela{" "}
-          <Link href="/abastecimentos?erro=1" className="font-medium text-blue-600 hover:underline">
+          <Link href="/abastecimentos?erro=1" className="font-medium text-brand-600 hover:underline">
             Abastecimentos
           </Link>{" "}
           para incluí-los na exportação.

@@ -87,7 +87,7 @@ export function UserRow({ user }: { user: UserRowData }) {
                 placeholder="Nova senha"
                 className="w-32 rounded border border-slate-300 px-2 py-1 text-xs"
               />
-              <button onClick={savePassword} disabled={isPending} className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700">
+              <button onClick={savePassword} disabled={isPending} className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700">
                 Salvar
               </button>
               <button onClick={() => setResetting(false)} className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">

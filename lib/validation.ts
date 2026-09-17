@@ -8,7 +8,7 @@ export const ERROR_LABELS: Record<string, string> = {
   KM_MENOR_QUE_ANTERIOR: "KM menor que o abastecimento anterior do mesmo veículo",
   LITROS_INVALIDO: "Litragem inválida ou ausente",
   LITROS_MUITO_ALTA: "Litragem muito alta para um único abastecimento (verifique)",
-  POSSIVEL_DUPLICIDADE: "Possível duplicidade (mesma placa, data e km)",
+  POSSIVEL_DUPLICIDADE: "Possível duplicidade (mesma placa, data, km e combustível)",
   SALTO_KM_MUITO_GRANDE: "Salto de KM muito grande em relação ao abastecimento anterior",
 };
 
@@ -18,6 +18,7 @@ export interface FuelRecordLike {
   data: Date | null;
   km: number | null;
   litros: number | null;
+  combustivel: string;
 }
 
 const LITROS_MAXIMO_RAZOAVEL = 600;
@@ -72,14 +73,14 @@ export function validateVehicleSequence(records: FuelRecordLike[]): Map<string, 
 
   const seenKeys = new Map<string, number>();
   for (const record of sorted) {
-    const key = `${record.data.toISOString().slice(0, 10)}|${record.km}`;
+    const key = `${record.data.toISOString().slice(0, 10)}|${record.km}|${record.combustivel}`;
     seenKeys.set(key, (seenKeys.get(key) ?? 0) + 1);
   }
 
   let previous: { km: number } | null = null;
   for (const record of sorted) {
     const errors: string[] = [];
-    const key = `${record.data.toISOString().slice(0, 10)}|${record.km}`;
+    const key = `${record.data.toISOString().slice(0, 10)}|${record.km}|${record.combustivel}`;
 
     if ((seenKeys.get(key) ?? 0) > 1) {
       errors.push("POSSIVEL_DUPLICIDADE");

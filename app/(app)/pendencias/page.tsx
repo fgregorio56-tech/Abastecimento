@@ -1,0 +1,159 @@
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/session";
+import { canEditData } from "@/lib/roles";
+import { EditableRow, type RowData } from "../abastecimentos/EditableRow";
+import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
+import { getVehicleCurrentKm } from "@/lib/data";
+
+export default async function PendenciasPage() {
+  const user = await requireUser();
+  const canEdit = canEditData(user.role);
+
+  const [errorRecords, incompleteVehicles, correctedCount, kmMap] = await Promise.all([
+    prisma.fuelRecord.findMany({
+      where: { hasError: true },
+      orderBy: [{ data: "desc" }],
+      take: 200,
+    }),
+    prisma.vehicle.findMany({
+      where: { ativo: true, OR: [{ marca: null }, { modelo: null }] },
+      orderBy: { placa: "asc" },
+    }),
+    prisma.fuelRecord.count({ where: { hasError: false, corrected: true } }),
+    getVehicleCurrentKm(),
+  ]);
+
+  const totalPendencias = errorRecords.length + incompleteVehicles.length;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Pendências</h1>
+        <p className="text-sm text-slate-500">
+          Abastecimentos com erro de validação e veículos sem cadastro completo — tudo que precisa de
+          atenção antes de entrar nos relatórios e na exportação.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-brand-100 bg-white p-4">
+          <p className="text-sm text-slate-500">Pendências abertas</p>
+          <p className="mt-1 text-2xl font-semibold text-red-600">{totalPendencias}</p>
+        </div>
+        <div className="rounded-xl border border-brand-100 bg-white p-4">
+          <p className="text-sm text-slate-500">Abastecimentos com erro</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-900">{errorRecords.length}</p>
+        </div>
+        <div className="rounded-xl border border-brand-100 bg-white p-4">
+          <p className="text-sm text-slate-500">Já corrigidos no histórico</p>
+          <p className="mt-1 text-2xl font-semibold text-emerald-600">{correctedCount}</p>
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Abastecimentos com erro ({errorRecords.length})
+          </h2>
+          <Link href="/abastecimentos?erro=1" className="text-xs font-medium text-brand-600 hover:underline">
+            Ver na tela de Abastecimentos →
+          </Link>
+        </div>
+        <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
+          <table className="w-full min-w-[820px] text-sm">
+            <thead>
+              <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-2">Placa</th>
+                <th className="px-3 py-2">Data</th>
+                <th className="px-3 py-2 text-right">KM</th>
+                <th className="px-3 py-2 text-right">Litros</th>
+                <th className="px-3 py-2">Combustível</th>
+                <th className="px-3 py-2">Origem</th>
+                <th className="px-3 py-2">Posto</th>
+                <th className="px-3 py-2">Situação</th>
+                {canEdit && <th className="px-3 py-2">Ações</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {errorRecords.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                    Nenhum abastecimento com erro. 🎉
+                  </td>
+                </tr>
+              )}
+              {errorRecords.map((r) => {
+                const row: RowData = {
+                  id: r.id,
+                  placaTexto: r.placaTexto,
+                  data: r.data ? r.data.toISOString() : null,
+                  km: r.km,
+                  litros: r.litros,
+                  combustivel: r.combustivel,
+                  origem: r.origem,
+                  posto: r.posto,
+                  hasError: r.hasError,
+                  errors: JSON.parse(r.errors) as string[],
+                  corrected: r.corrected,
+                };
+                return <EditableRow key={r.id} row={row} canEdit={canEdit} />;
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold text-slate-900">
+          Veículos sem cadastro completo ({incompleteVehicles.length})
+        </h2>
+        <p className="mb-2 text-xs text-slate-500">
+          Veículos criados automaticamente durante a importação, sem marca/modelo cadastrados — não
+          entram na comparação de metas por grupo (marca/modelo) até serem completados.
+        </p>
+        <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
+          <table className="w-full min-w-[820px] text-sm">
+            <thead>
+              <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="px-3 py-2">Placa</th>
+                <th className="px-3 py-2">Marca</th>
+                <th className="px-3 py-2">Modelo</th>
+                <th className="px-3 py-2">Ano modelo</th>
+                <th className="px-3 py-2">Ano fabricação</th>
+                <th className="px-3 py-2 text-right">KM atual</th>
+                <th className="px-3 py-2 text-right">Média geral</th>
+                <th className="px-3 py-2">Situação</th>
+                {canEdit && <th className="px-3 py-2">Ações</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {incompleteVehicles.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                    Todos os veículos ativos têm cadastro completo. 🎉
+                  </td>
+                </tr>
+              )}
+              {incompleteVehicles.map((v) => {
+                const row: VehicleRowData = {
+                  id: v.id,
+                  placa: v.placa,
+                  marca: v.marca,
+                  modelo: v.modelo,
+                  anoModelo: v.anoModelo,
+                  anoFabricacao: v.anoFabricacao,
+                  ativo: v.ativo,
+                  kmAtual: kmMap.get(v.id) ?? null,
+                  media: null,
+                  registros: 0,
+                };
+                return <VehicleRow key={v.id} vehicle={row} canEdit={canEdit} />;
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

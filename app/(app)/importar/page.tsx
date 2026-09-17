@@ -15,11 +15,11 @@ export default async function ImportarPage() {
         </p>
       </div>
 
-      <div className="max-w-xl rounded-xl border border-slate-200 bg-white p-6">
+      <div className="max-w-xl rounded-xl border border-brand-100 bg-white p-6">
         <UploadForm />
       </div>
 
-      <div className="max-w-xl rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+      <div className="max-w-xl rounded-xl border border-brand-100 bg-slate-50 p-4 text-sm text-slate-600">
         <p className="font-medium text-slate-800">Dicas para uma boa importação</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>A primeira linha da planilha deve conter os nomes das colunas.</li>

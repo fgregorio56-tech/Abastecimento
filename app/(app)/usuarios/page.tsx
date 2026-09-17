@@ -18,15 +18,15 @@ export default async function UsuariosPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-brand-100 bg-white p-6">
         <h2 className="mb-3 text-sm font-semibold text-slate-900">Novo usuário</h2>
         <CreateUserForm />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[700px] text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <th className="px-3 py-2">Nome</th>
               <th className="px-3 py-2">E-mail</th>
               <th className="px-3 py-2">Perfil</th>

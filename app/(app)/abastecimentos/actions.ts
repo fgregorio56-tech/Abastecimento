@@ -5,25 +5,41 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { normalizePlaca, isPlacaValida } from "@/lib/placa";
 import { revalidateVehicleRecords, revalidateUnlinkedRecords } from "@/lib/revalidate";
+import { logActivity } from "@/lib/activityLog";
+import { FUEL_TYPES, ORIGENS } from "@/lib/roles";
 
 export interface UpdateResult {
   ok: boolean;
   error?: string;
 }
 
+function revalidateAbastecimentoPaths() {
+  revalidatePath("/abastecimentos");
+  revalidatePath("/pendencias");
+  revalidatePath("/ticket-log");
+  revalidatePath("/");
+  revalidatePath("/veiculos");
+}
+
 export async function updateFuelRecord(
   id: string,
-  input: { placa: string; data: string; km: string; litros: string },
+  input: { placa: string; data: string; km: string; litros: string; combustivel?: string; origem?: string },
 ): Promise<UpdateResult> {
   const user = await requireRole("MASTER", "EDITOR");
 
-  const record = await prisma.fuelRecord.findUnique({ where: { id }, select: { vehicleId: true } });
+  const record = await prisma.fuelRecord.findUnique({ where: { id }, select: { vehicleId: true, placaTexto: true } });
   if (!record) return { ok: false, error: "Registro não encontrado." };
 
   const placaTexto = normalizePlaca(input.placa);
   const parsedDate = input.data ? new Date(`${input.data}T12:00:00Z`) : null;
   const km = input.km === "" ? null : Number(input.km.replace(",", "."));
   const litros = input.litros === "" ? null : Number(input.litros.replace(",", "."));
+  const combustivel = input.combustivel && FUEL_TYPES.includes(input.combustivel as (typeof FUEL_TYPES)[number])
+    ? input.combustivel
+    : undefined;
+  const origem = input.origem && ORIGENS.includes(input.origem as (typeof ORIGENS)[number])
+    ? input.origem
+    : undefined;
 
   let vehicleId: string | null = null;
   if (isPlacaValida(placaTexto)) {
@@ -45,6 +61,8 @@ export async function updateFuelRecord(
       data: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : null,
       km: km !== null && Number.isFinite(km) ? km : null,
       litros: litros !== null && Number.isFinite(litros) ? litros : null,
+      ...(combustivel ? { combustivel } : {}),
+      ...(origem ? { origem } : {}),
       corrected: true,
       updatedById: user.id,
     },
@@ -60,17 +78,17 @@ export async function updateFuelRecord(
     await revalidateUnlinkedRecords();
   }
 
-  revalidatePath("/abastecimentos");
-  revalidatePath("/");
-  revalidatePath("/veiculos");
+  await logActivity("CORRECAO", `Corrigiu abastecimento de ${record.placaTexto || placaTexto}`, user.id);
+
+  revalidateAbastecimentoPaths();
 
   return { ok: true };
 }
 
 export async function deleteFuelRecord(id: string): Promise<UpdateResult> {
-  await requireRole("MASTER", "EDITOR");
+  const user = await requireRole("MASTER", "EDITOR");
 
-  const record = await prisma.fuelRecord.findUnique({ where: { id }, select: { vehicleId: true } });
+  const record = await prisma.fuelRecord.findUnique({ where: { id }, select: { vehicleId: true, placaTexto: true } });
   if (!record) return { ok: false, error: "Registro não encontrado." };
 
   await prisma.fuelRecord.delete({ where: { id } });
@@ -79,9 +97,9 @@ export async function deleteFuelRecord(id: string): Promise<UpdateResult> {
     await revalidateVehicleRecords(record.vehicleId);
   }
 
-  revalidatePath("/abastecimentos");
-  revalidatePath("/");
-  revalidatePath("/veiculos");
+  await logActivity("EXCLUSAO", `Excluiu abastecimento de ${record.placaTexto}`, user.id);
+
+  revalidateAbastecimentoPaths();
 
   return { ok: true };
 }

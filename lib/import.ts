@@ -10,6 +10,7 @@ export interface ParsedRow {
   valorTotal: number | null;
   posto: string | null;
   combustivel: string | null;
+  origem: string | null;
   motorista: string | null;
   marca: string | null;
   modelo: string | null;
@@ -55,6 +56,9 @@ const HEADER_SYNONYMS: Record<string, keyof ParsedRow> = {
   local: "posto",
   combustivel: "combustivel",
   tipocombustivel: "combustivel",
+  origem: "origem",
+  tipoabastecimento: "origem",
+  internoexterno: "origem",
   motorista: "motorista",
   condutor: "motorista",
   marca: "marca",
@@ -76,6 +80,19 @@ const FUEL_TYPE_SYNONYMS: Record<string, string> = {
   gnv: "GNV",
   arla: "ARLA",
   arla32: "ARLA",
+  lubrificante: "LUBRIFICANTE",
+  oleo: "LUBRIFICANTE",
+  oleolubrificante: "LUBRIFICANTE",
+};
+
+const ORIGEM_SYNONYMS: Record<string, string> = {
+  interno: "INTERNO",
+  int: "INTERNO",
+  frota: "INTERNO",
+  bombainterna: "INTERNO",
+  externo: "EXTERNO",
+  ext: "EXTERNO",
+  posto: "EXTERNO",
 };
 
 function excelSerialToDate(serial: number): Date {
@@ -168,6 +185,11 @@ export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
           mapped.combustivel = FUEL_TYPE_SYNONYMS[norm] ?? "OUTRO";
           break;
         }
+        case "origem": {
+          const norm = normalizeHeader(String(value ?? ""));
+          mapped.origem = ORIGEM_SYNONYMS[norm] ?? "EXTERNO";
+          break;
+        }
         case "placaTexto":
           mapped.placaTexto = normalizePlaca(String(value ?? ""));
           break;
@@ -185,6 +207,7 @@ export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
       valorTotal: mapped.valorTotal ?? null,
       posto: mapped.posto ?? null,
       combustivel: mapped.combustivel ?? "DIESEL",
+      origem: mapped.origem ?? "EXTERNO",
       motorista: mapped.motorista ?? null,
       marca: mapped.marca ?? null,
       modelo: mapped.modelo ?? null,

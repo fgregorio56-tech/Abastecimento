@@ -61,7 +61,7 @@ export function PeriodFilter({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-xl border border-brand-100 bg-white p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-slate-900">Período</h3>
         <div className="flex gap-2">
@@ -72,7 +72,7 @@ export function PeriodFilter({
               apply(null);
             }}
             className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-              isAll ? "bg-blue-600 text-white" : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+              isAll ? "bg-brand-600 text-white" : "border border-slate-300 text-slate-700 hover:bg-slate-50"
             }`}
           >
             Todo o período
@@ -104,7 +104,7 @@ export function PeriodFilter({
                     onClick={() => toggle(m)}
                     className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
                       draft.has(m)
-                        ? "bg-blue-100 text-blue-800 ring-1 ring-blue-400"
+                        ? "bg-brand-100 text-brand-800 ring-1 ring-brand-400"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >

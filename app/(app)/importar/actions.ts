@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/session";
 import { parseWorkbook } from "@/lib/import";
 import { isPlacaValida } from "@/lib/placa";
 import { revalidateVehicleRecords, revalidateUnlinkedRecords } from "@/lib/revalidate";
+import { logActivity } from "@/lib/activityLog";
 import { revalidatePath } from "next/cache";
 
 export interface ImportState {
@@ -81,6 +82,7 @@ export async function processImport(_prevState: ImportState, formData: FormData)
         valorTotal: row.valorTotal,
         posto: row.posto,
         combustivel: row.combustivel ?? "DIESEL",
+        origem: row.origem ?? "EXTERNO",
         motorista: row.motorista,
         importBatchId: batch.id,
         createdById: user.id,
@@ -98,9 +100,16 @@ export async function processImport(_prevState: ImportState, formData: FormData)
   const errorRows = await prisma.fuelRecord.count({ where: { importBatchId: batch.id, hasError: true } });
   await prisma.importBatch.update({ where: { id: batch.id }, data: { errorRows } });
 
+  await logActivity(
+    "IMPORTACAO",
+    `Importou "${file.name}" (${rows.length} linha(s), ${errorRows} com pendência)`,
+    user.id,
+  );
+
   revalidatePath("/");
   revalidatePath("/abastecimentos");
   revalidatePath("/veiculos");
+  revalidatePath("/pendencias");
 
   redirect(`/abastecimentos?lote=${batch.id}`);
 }

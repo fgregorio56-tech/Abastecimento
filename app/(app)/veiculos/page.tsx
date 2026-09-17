@@ -44,15 +44,15 @@ export default async function VeiculosPage() {
           <h1 className="text-2xl font-bold text-slate-900">Veículos</h1>
           <p className="text-sm text-slate-500">{vehicles.length} veículo(s) cadastrados</p>
         </div>
-        <Link href="/metas" className="text-sm font-medium text-blue-600 hover:underline">
+        <Link href="/metas" className="text-sm font-medium text-brand-600 hover:underline">
           Ver metas de consumo →
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[820px] text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <th className="px-3 py-2">Placa</th>
               <th className="px-3 py-2">Marca</th>
               <th className="px-3 py-2">Modelo</th>

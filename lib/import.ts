@@ -16,6 +16,8 @@ export interface ParsedRow {
   modelo: string | null;
   anoModelo: number | null;
   anoFabricacao: number | null;
+  tipoVeiculo: string | null;
+  capacidadeTanque: number | null;
   linhaOriginal: number;
 }
 
@@ -67,6 +69,10 @@ const HEADER_SYNONYMS: Record<string, keyof ParsedRow> = {
   ano: "anoModelo",
   anofabricacao: "anoFabricacao",
   anofab: "anoFabricacao",
+  tipoveiculo: "tipoVeiculo",
+  tipo: "tipoVeiculo",
+  capacidadetanque: "capacidadeTanque",
+  capacidade: "capacidadeTanque",
 };
 
 const FUEL_TYPE_SYNONYMS: Record<string, string> = {
@@ -180,6 +186,9 @@ export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
         case "anoFabricacao":
           mapped[key] = parseNumber(value) ? Math.round(parseNumber(value)!) : null;
           break;
+        case "capacidadeTanque":
+          mapped.capacidadeTanque = parseNumber(value);
+          break;
         case "combustivel": {
           const norm = normalizeHeader(String(value ?? ""));
           mapped.combustivel = FUEL_TYPE_SYNONYMS[norm] ?? "OUTRO";
@@ -213,6 +222,8 @@ export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
       modelo: mapped.modelo ?? null,
       anoModelo: mapped.anoModelo ?? null,
       anoFabricacao: mapped.anoFabricacao ?? null,
+      tipoVeiculo: mapped.tipoVeiculo ?? null,
+      capacidadeTanque: mapped.capacidadeTanque ?? null,
       linhaOriginal: index + 2,
     };
   });

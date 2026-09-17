@@ -4,10 +4,13 @@ import { requireUser } from "@/lib/session";
 import { canEditData } from "@/lib/roles";
 import { parsePeriod } from "@/lib/period";
 import type { RowData } from "./EditableRow";
-import { FuelRecordsTable } from "./FuelRecordsTable";
+import { FuelRecordsTable, type SortLinks } from "./FuelRecordsTable";
+import { SearchBox } from "../SearchBox";
 import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 50;
+const SORTABLE_FIELDS = ["placaTexto", "data", "km", "litros"] as const;
+type SortableField = (typeof SORTABLE_FIELDS)[number];
 
 export default async function AbastecimentosPage({
   searchParams,
@@ -19,27 +22,44 @@ export default async function AbastecimentosPage({
   const somenteErro = params.erro === "1";
   const page = Math.max(1, Number(params.pagina ?? "1") || 1);
   const meses = parsePeriod(params);
-
+  const q = typeof params.q === "string" ? params.q.trim() : "";
   const lote = typeof params.lote === "string" ? params.lote : undefined;
 
-  const where: Prisma.FuelRecordWhereInput = {
-    ...(somenteErro ? { hasError: true } : {}),
-    ...(lote ? { importBatchId: lote } : {}),
-  };
+  const sortParam = typeof params.sort === "string" ? params.sort : undefined;
+  const currentSort: SortableField | undefined = SORTABLE_FIELDS.includes(sortParam as SortableField)
+    ? (sortParam as SortableField)
+    : undefined;
+  const currentDir: "asc" | "desc" = params.dir === "asc" ? "asc" : "desc";
+
+  const andConditions: Prisma.FuelRecordWhereInput[] = [];
+  if (somenteErro) andConditions.push({ hasError: true });
+  if (lote) andConditions.push({ importBatchId: lote });
   if (meses) {
-    where.OR = [...meses].map((mes) => {
-      const [ano, mm] = mes.split("-").map(Number);
-      const start = new Date(Date.UTC(ano, mm - 1, 1));
-      const end = new Date(Date.UTC(ano, mm, 1));
-      return { data: { gte: start, lt: end } };
+    andConditions.push({
+      OR: [...meses].map((mes) => {
+        const [ano, mm] = mes.split("-").map(Number);
+        const start = new Date(Date.UTC(ano, mm - 1, 1));
+        const end = new Date(Date.UTC(ano, mm, 1));
+        return { data: { gte: start, lt: end } };
+      }),
     });
   }
+  if (q) {
+    andConditions.push({
+      OR: [{ placaTexto: { contains: q } }, { motorista: { contains: q } }],
+    });
+  }
+  const where: Prisma.FuelRecordWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const orderBy: Prisma.FuelRecordOrderByWithRelationInput[] = currentSort
+    ? [{ [currentSort]: currentDir }]
+    : [{ hasError: "desc" }, { data: "desc" }];
 
   const [total, records, errorCount] = await Promise.all([
     prisma.fuelRecord.count({ where }),
     prisma.fuelRecord.findMany({
       where,
-      orderBy: [{ hasError: "desc" }, { data: "desc" }],
+      orderBy,
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
@@ -49,14 +69,39 @@ export default async function AbastecimentosPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const canEdit = canEditData(user.role);
 
-  function pageHref(p: number) {
+  function baseParams() {
     const sp = new URLSearchParams();
     if (somenteErro) sp.set("erro", "1");
     if (lote) sp.set("lote", lote);
     if (meses) for (const m of meses) sp.append("mes", m);
+    if (q) sp.set("q", q);
+    return sp;
+  }
+
+  function pageHref(p: number) {
+    const sp = baseParams();
+    if (currentSort) {
+      sp.set("sort", currentSort);
+      sp.set("dir", currentDir);
+    }
     sp.set("pagina", String(p));
     return `/abastecimentos?${sp.toString()}`;
   }
+
+  function sortHref(column: SortableField) {
+    const sp = baseParams();
+    const nextDir: "asc" | "desc" = currentSort === column && currentDir === "asc" ? "desc" : "asc";
+    sp.set("sort", column);
+    sp.set("dir", nextDir);
+    return `/abastecimentos?${sp.toString()}`;
+  }
+
+  const sortLinks: SortLinks = {
+    placaTexto: sortHref("placaTexto"),
+    data: sortHref("data"),
+    km: sortHref("km"),
+    litros: sortHref("litros"),
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -82,6 +127,8 @@ export default async function AbastecimentosPage({
         </div>
       </div>
 
+      <SearchBox initialValue={q} placeholder="Buscar por placa ou motorista..." />
+
       <FuelRecordsTable
         rows={records.map(
           (r): RowData => ({
@@ -92,6 +139,7 @@ export default async function AbastecimentosPage({
             litros: r.litros,
             combustivel: r.combustivel,
             origem: r.origem,
+            motorista: r.motorista,
             posto: r.posto,
             hasError: r.hasError,
             errors: JSON.parse(r.errors) as string[],
@@ -99,6 +147,9 @@ export default async function AbastecimentosPage({
           }),
         )}
         canEdit={canEdit}
+        sortLinks={sortLinks}
+        currentSort={currentSort}
+        currentDir={currentDir}
       />
 
       {totalPages > 1 && (

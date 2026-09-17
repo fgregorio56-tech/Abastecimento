@@ -12,6 +12,8 @@ export interface VehicleRowData {
   modelo: string | null;
   anoModelo: number | null;
   anoFabricacao: number | null;
+  tipoVeiculo: string | null;
+  capacidadeTanque: number | null;
   ativo: boolean;
   kmAtual: number | null;
   media: number | null;
@@ -27,11 +29,21 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
   const [modelo, setModelo] = useState(vehicle.modelo ?? "");
   const [anoModelo, setAnoModelo] = useState(vehicle.anoModelo?.toString() ?? "");
   const [anoFabricacao, setAnoFabricacao] = useState(vehicle.anoFabricacao?.toString() ?? "");
+  const [tipoVeiculo, setTipoVeiculo] = useState(vehicle.tipoVeiculo ?? "");
+  const [capacidadeTanque, setCapacidadeTanque] = useState(vehicle.capacidadeTanque?.toString() ?? "");
   const [ativo, setAtivo] = useState(vehicle.ativo);
 
   function save() {
     startTransition(async () => {
-      await updateVehicle(vehicle.id, { marca, modelo, anoModelo, anoFabricacao, ativo });
+      await updateVehicle(vehicle.id, {
+        marca,
+        modelo,
+        anoModelo,
+        anoFabricacao,
+        tipoVeiculo,
+        capacidadeTanque,
+        ativo,
+      });
       setEditing(false);
       router.refresh();
     });
@@ -52,6 +64,24 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
         </td>
         <td className="px-3 py-2">
           <input value={anoFabricacao} onChange={(e) => setAnoFabricacao(e.target.value)} placeholder="Fab." inputMode="numeric" className="w-16 rounded border border-slate-300 px-2 py-1 text-sm" />
+        </td>
+        <td className="px-3 py-2">
+          <input
+            value={tipoVeiculo}
+            onChange={(e) => setTipoVeiculo(e.target.value)}
+            placeholder="Tipo"
+            list="tipos-veiculo-sugeridos"
+            className="w-24 rounded border border-slate-300 px-2 py-1 text-sm"
+          />
+        </td>
+        <td className="px-3 py-2">
+          <input
+            value={capacidadeTanque}
+            onChange={(e) => setCapacidadeTanque(e.target.value)}
+            placeholder="Litros"
+            inputMode="decimal"
+            className="w-20 rounded border border-slate-300 px-2 py-1 text-right text-sm"
+          />
         </td>
         <td className="px-3 py-2 text-right tabular-nums text-slate-500">{formatKm(vehicle.kmAtual)}</td>
         <td className="px-3 py-2 text-right tabular-nums text-slate-500">{formatMedia(vehicle.media)}</td>
@@ -80,6 +110,10 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
       <td className="px-3 py-2 text-slate-600">{vehicle.modelo ?? "—"}</td>
       <td className="px-3 py-2 text-slate-600">{vehicle.anoModelo ?? "—"}</td>
       <td className="px-3 py-2 text-slate-600">{vehicle.anoFabricacao ?? "—"}</td>
+      <td className="px-3 py-2 text-slate-600">{vehicle.tipoVeiculo ?? "—"}</td>
+      <td className="px-3 py-2 text-right tabular-nums text-slate-600">
+        {vehicle.capacidadeTanque ? `${vehicle.capacidadeTanque} L` : "—"}
+      </td>
       <td className="px-3 py-2 text-right tabular-nums text-slate-600">{formatKm(vehicle.kmAtual)}</td>
       <td className="px-3 py-2 text-right tabular-nums font-medium text-slate-900">{formatMedia(vehicle.media)}</td>
       <td className="px-3 py-2">

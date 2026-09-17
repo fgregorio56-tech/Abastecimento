@@ -13,9 +13,19 @@ export interface VehicleUpdateResult {
 
 export async function updateVehicle(
   id: string,
-  input: { marca: string; modelo: string; anoModelo: string; anoFabricacao: string; ativo: boolean },
+  input: {
+    marca: string;
+    modelo: string;
+    anoModelo: string;
+    anoFabricacao: string;
+    tipoVeiculo: string;
+    capacidadeTanque: string;
+    ativo: boolean;
+  },
 ): Promise<VehicleUpdateResult> {
   const user = await requireRole("MASTER", "EDITOR");
+
+  const capacidade = input.capacidadeTanque ? Number(input.capacidadeTanque.replace(",", ".")) : null;
 
   const vehicle = await prisma.vehicle.update({
     where: { id },
@@ -24,6 +34,8 @@ export async function updateVehicle(
       modelo: input.modelo || null,
       anoModelo: input.anoModelo ? Number(input.anoModelo) : null,
       anoFabricacao: input.anoFabricacao ? Number(input.anoFabricacao) : null,
+      tipoVeiculo: input.tipoVeiculo || null,
+      capacidadeTanque: capacidade !== null && Number.isFinite(capacidade) ? capacidade : null,
       ativo: input.ativo,
     },
   });

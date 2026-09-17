@@ -15,6 +15,7 @@ export interface RowData {
   litros: number | null;
   combustivel: string;
   origem: string;
+  motorista: string | null;
   posto: string | null;
   hasError: boolean;
   errors: string[];
@@ -48,11 +49,12 @@ export function EditableRow({
   const [litros, setLitros] = useState(row.litros?.toString() ?? "");
   const [combustivel, setCombustivel] = useState(row.combustivel);
   const [origem, setOrigem] = useState(row.origem);
+  const [motorista, setMotorista] = useState(row.motorista ?? "");
 
   function save() {
     setError(null);
     startTransition(async () => {
-      const result = await updateFuelRecord(row.id, { placa, data, km, litros, combustivel, origem });
+      const result = await updateFuelRecord(row.id, { placa, data, km, litros, combustivel, origem, motorista });
       if (!result.ok) {
         setError(result.error ?? "Erro ao salvar.");
         return;
@@ -135,6 +137,13 @@ export function EditableRow({
             ))}
           </select>
         </td>
+        <td className="py-2 pr-2">
+          <input
+            value={motorista}
+            onChange={(e) => setMotorista(e.target.value)}
+            className="w-28 rounded border border-slate-300 px-2 py-1 text-sm"
+          />
+        </td>
         <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
         <td className="py-2 pr-2 text-xs text-red-600">
           {error}
@@ -180,6 +189,7 @@ export function EditableRow({
           {ORIGEM_LABELS[row.origem as keyof typeof ORIGEM_LABELS] ?? row.origem}
         </span>
       </td>
+      <td className="py-2 pr-2 text-slate-500">{row.motorista ?? "—"}</td>
       <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
       <td className="py-2 pr-2">
         {row.hasError ? (

@@ -53,6 +53,20 @@ export const ORIGEM_LABELS: Record<Origem, string> = {
   INTERNO: "Interno (frota)",
 };
 
+/** Sugestões de tipo de veículo (lista aberta — qualquer texto é aceito). */
+export const TIPOS_VEICULO_SUGERIDOS = [
+  "¾",
+  "Toco",
+  "Truck",
+  "Carreta",
+  "VUC",
+  "HR",
+  "Fiorino",
+  "Poliguindaste",
+  "Utilitário",
+  "Passeio",
+];
+
 export const ACTIVITY_TYPES = [
   "IMPORTACAO",
   "CORRECAO",

@@ -55,6 +55,8 @@ export async function processImport(_prevState: ImportState, formData: FormData)
             ...(row.modelo ? { modelo: row.modelo } : {}),
             ...(row.anoModelo ? { anoModelo: row.anoModelo } : {}),
             ...(row.anoFabricacao ? { anoFabricacao: row.anoFabricacao } : {}),
+            ...(row.tipoVeiculo ? { tipoVeiculo: row.tipoVeiculo } : {}),
+            ...(row.capacidadeTanque ? { capacidadeTanque: row.capacidadeTanque } : {}),
           },
           create: {
             placa: row.placaTexto,
@@ -62,6 +64,8 @@ export async function processImport(_prevState: ImportState, formData: FormData)
             modelo: row.modelo,
             anoModelo: row.anoModelo,
             anoFabricacao: row.anoFabricacao,
+            tipoVeiculo: row.tipoVeiculo,
+            capacidadeTanque: row.capacidadeTanque,
             createdById: user.id,
           },
         });

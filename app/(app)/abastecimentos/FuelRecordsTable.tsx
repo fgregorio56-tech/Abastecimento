@@ -2,10 +2,62 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { EditableRow, type RowData } from "./EditableRow";
 import { deleteMultipleFuelRecords } from "./actions";
 
-export function FuelRecordsTable({ rows, canEdit }: { rows: RowData[]; canEdit: boolean }) {
+export interface SortLinks {
+  placaTexto: string;
+  data: string;
+  km: string;
+  litros: string;
+}
+
+function SortableTh({
+  label,
+  column,
+  href,
+  currentSort,
+  currentDir,
+  align = "left",
+}: {
+  label: string;
+  column: string;
+  href?: string;
+  currentSort?: string;
+  currentDir?: "asc" | "desc";
+  align?: "left" | "right";
+}) {
+  if (!href) {
+    return <th className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}>{label}</th>;
+  }
+  const active = currentSort === column;
+  return (
+    <th className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
+      <Link
+        href={href}
+        className={`inline-flex items-center gap-1 hover:text-brand-700 ${active ? "text-brand-700" : ""}`}
+      >
+        {label}
+        {active && <span aria-hidden>{currentDir === "asc" ? "▲" : "▼"}</span>}
+      </Link>
+    </th>
+  );
+}
+
+export function FuelRecordsTable({
+  rows,
+  canEdit,
+  sortLinks,
+  currentSort,
+  currentDir,
+}: {
+  rows: RowData[];
+  canEdit: boolean;
+  sortLinks?: SortLinks;
+  currentSort?: string;
+  currentDir?: "asc" | "desc";
+}) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
@@ -35,7 +87,7 @@ export function FuelRecordsTable({ rows, canEdit }: { rows: RowData[]; canEdit: 
     });
   }
 
-  const colSpan = canEdit ? 10 : 8;
+  const colSpan = canEdit ? 11 : 9;
 
   return (
     <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
@@ -59,7 +111,7 @@ export function FuelRecordsTable({ rows, canEdit }: { rows: RowData[]; canEdit: 
           </div>
         </div>
       )}
-      <table className="w-full min-w-[860px] text-sm">
+      <table className="w-full min-w-[960px] text-sm">
         <thead>
           <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
             {canEdit && (
@@ -72,12 +124,13 @@ export function FuelRecordsTable({ rows, canEdit }: { rows: RowData[]; canEdit: 
                 />
               </th>
             )}
-            <th className="px-3 py-2">Placa</th>
-            <th className="px-3 py-2">Data</th>
-            <th className="px-3 py-2 text-right">KM</th>
-            <th className="px-3 py-2 text-right">Litros</th>
+            <SortableTh label="Placa" column="placaTexto" href={sortLinks?.placaTexto} currentSort={currentSort} currentDir={currentDir} />
+            <SortableTh label="Data" column="data" href={sortLinks?.data} currentSort={currentSort} currentDir={currentDir} />
+            <SortableTh label="KM" column="km" href={sortLinks?.km} currentSort={currentSort} currentDir={currentDir} align="right" />
+            <SortableTh label="Litros" column="litros" href={sortLinks?.litros} currentSort={currentSort} currentDir={currentDir} align="right" />
             <th className="px-3 py-2">Combustível</th>
             <th className="px-3 py-2">Origem</th>
+            <th className="px-3 py-2">Motorista</th>
             <th className="px-3 py-2">Posto</th>
             <th className="px-3 py-2">Situação</th>
             {canEdit && <th className="px-3 py-2">Ações</th>}

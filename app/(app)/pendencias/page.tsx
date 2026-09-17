@@ -71,6 +71,7 @@ export default async function PendenciasPage() {
               litros: r.litros,
               combustivel: r.combustivel,
               origem: r.origem,
+              motorista: r.motorista,
               posto: r.posto,
               hasError: r.hasError,
               errors: JSON.parse(r.errors) as string[],
@@ -98,6 +99,8 @@ export default async function PendenciasPage() {
                 <th className="px-3 py-2">Modelo</th>
                 <th className="px-3 py-2">Ano modelo</th>
                 <th className="px-3 py-2">Ano fabricação</th>
+                <th className="px-3 py-2">Tipo</th>
+                <th className="px-3 py-2 text-right">Capacidade</th>
                 <th className="px-3 py-2 text-right">KM atual</th>
                 <th className="px-3 py-2 text-right">Média geral</th>
                 <th className="px-3 py-2">Situação</th>
@@ -107,7 +110,7 @@ export default async function PendenciasPage() {
             <tbody>
               {incompleteVehicles.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                  <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
                     Todos os veículos ativos têm cadastro completo. 🎉
                   </td>
                 </tr>
@@ -120,6 +123,8 @@ export default async function PendenciasPage() {
                   modelo: v.modelo,
                   anoModelo: v.anoModelo,
                   anoFabricacao: v.anoFabricacao,
+                  tipoVeiculo: v.tipoVeiculo,
+                  capacidadeTanque: v.capacidadeTanque,
                   ativo: v.ativo,
                   kmAtual: kmMap.get(v.id) ?? null,
                   media: null,

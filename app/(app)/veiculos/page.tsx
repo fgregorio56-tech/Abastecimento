@@ -1,14 +1,29 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { canEditData } from "@/lib/roles";
+import { canEditData, TIPOS_VEICULO_SUGERIDOS } from "@/lib/roles";
 import { getValidRecordsForMetrics, getVehicleCurrentKm } from "@/lib/data";
 import { computeMetrics } from "@/lib/metrics";
 import { VehicleRow, type VehicleRowData } from "./VehicleRow";
+import { SearchBox } from "../SearchBox";
 
-export default async function VeiculosPage() {
+const SORTABLE_FIELDS = ["placa", "marca", "modelo", "tipoVeiculo", "kmAtual", "media"] as const;
+type SortableField = (typeof SORTABLE_FIELDS)[number];
+
+export default async function VeiculosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const user = await requireUser();
   const canEdit = canEditData(user.role);
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q.trim().toLowerCase() : "";
+  const sortParam = typeof params.sort === "string" ? params.sort : undefined;
+  const currentSort: SortableField = SORTABLE_FIELDS.includes(sortParam as SortableField)
+    ? (sortParam as SortableField)
+    : "placa";
+  const currentDir: "asc" | "desc" = params.dir === "desc" ? "desc" : "asc";
 
   const [vehicles, records] = await Promise.all([
     prisma.vehicle.findMany({ orderBy: { placa: "asc" } }),
@@ -17,8 +32,9 @@ export default async function VeiculosPage() {
 
   const { byVehicle } = computeMetrics(records, null);
   const mediaByVehicle = new Map(byVehicle.map((v) => [v.vehicleId, v]));
+  const kmMap = await getVehicleCurrentKm();
 
-  const rows: VehicleRowData[] = vehicles.map((v) => {
+  let rows: VehicleRowData[] = vehicles.map((v) => {
     const agg = mediaByVehicle.get(v.id);
     return {
       id: v.id,
@@ -27,39 +43,93 @@ export default async function VeiculosPage() {
       modelo: v.modelo,
       anoModelo: v.anoModelo,
       anoFabricacao: v.anoFabricacao,
+      tipoVeiculo: v.tipoVeiculo,
+      capacidadeTanque: v.capacidadeTanque,
       ativo: v.ativo,
-      kmAtual: null,
+      kmAtual: kmMap.get(v.id) ?? null,
       media: agg?.media ?? null,
       registros: agg?.registros ?? 0,
     };
   });
 
-  const kmMap = await getVehicleCurrentKm();
-  for (const row of rows) row.kmAtual = kmMap.get(row.id) ?? null;
+  if (q) {
+    rows = rows.filter((v) =>
+      [v.placa, v.marca, v.modelo, v.tipoVeiculo].some((field) => field?.toLowerCase().includes(q)),
+    );
+  }
+
+  const dirMultiplier = currentDir === "asc" ? 1 : -1;
+  rows = [...rows].sort((a, b) => {
+    const av = a[currentSort];
+    const bv = b[currentSort];
+    if (av === null && bv === null) return 0;
+    if (av === null) return 1;
+    if (bv === null) return -1;
+    if (typeof av === "string" && typeof bv === "string") {
+      return av.localeCompare(bv) * dirMultiplier;
+    }
+    return ((av as number) - (bv as number)) * dirMultiplier;
+  });
+
+  function baseParams() {
+    const sp = new URLSearchParams();
+    if (q) sp.set("q", q);
+    return sp;
+  }
+
+  function sortHref(column: SortableField) {
+    const sp = baseParams();
+    const nextDir: "asc" | "desc" = currentSort === column && currentDir === "asc" ? "desc" : "asc";
+    sp.set("sort", column);
+    sp.set("dir", nextDir);
+    return `/veiculos?${sp.toString()}`;
+  }
+
+  function sortTh(label: string, column: SortableField, align: "left" | "right" = "left") {
+    const active = currentSort === column;
+    return (
+      <th key={column} className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
+        <Link
+          href={sortHref(column)}
+          className={`inline-flex items-center gap-1 hover:text-brand-700 ${active ? "text-brand-700" : ""}`}
+        >
+          {label}
+          {active && <span aria-hidden>{currentDir === "asc" ? "▲" : "▼"}</span>}
+        </Link>
+      </th>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Veículos</h1>
-          <p className="text-sm text-slate-500">{vehicles.length} veículo(s) cadastrados</p>
+          <p className="text-sm text-slate-500">
+            {rows.length} de {vehicles.length} veículo(s) {q && "encontrados"}
+            {!q && "cadastrados"}
+          </p>
         </div>
         <Link href="/metas" className="text-sm font-medium text-brand-600 hover:underline">
           Ver metas de consumo →
         </Link>
       </div>
 
+      <SearchBox initialValue={q} placeholder="Buscar por placa, marca, modelo ou tipo..." />
+
       <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="w-full min-w-[960px] text-sm">
           <thead>
             <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-              <th className="px-3 py-2">Placa</th>
-              <th className="px-3 py-2">Marca</th>
-              <th className="px-3 py-2">Modelo</th>
+              {sortTh("Placa", "placa")}
+              {sortTh("Marca", "marca")}
+              {sortTh("Modelo", "modelo")}
               <th className="px-3 py-2">Ano modelo</th>
               <th className="px-3 py-2">Ano fabricação</th>
-              <th className="px-3 py-2 text-right">KM atual</th>
-              <th className="px-3 py-2 text-right">Média geral</th>
+              {sortTh("Tipo", "tipoVeiculo")}
+              <th className="px-3 py-2 text-right">Capacidade</th>
+              {sortTh("KM atual", "kmAtual", "right")}
+              {sortTh("Média geral", "media", "right")}
               <th className="px-3 py-2">Situação</th>
               {canEdit && <th className="px-3 py-2">Ações</th>}
             </tr>
@@ -67,8 +137,10 @@ export default async function VeiculosPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
-                  Nenhum veículo cadastrado. Importe uma planilha de abastecimentos para começar.
+                <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
+                  {vehicles.length === 0
+                    ? "Nenhum veículo cadastrado. Importe uma planilha de abastecimentos para começar."
+                    : "Nenhum veículo encontrado para essa busca."}
                 </td>
               </tr>
             )}
@@ -78,6 +150,12 @@ export default async function VeiculosPage() {
           </tbody>
         </table>
       </div>
+
+      <datalist id="tipos-veiculo-sugeridos">
+        {TIPOS_VEICULO_SUGERIDOS.map((t) => (
+          <option key={t} value={t} />
+        ))}
+      </datalist>
     </div>
   );
 }

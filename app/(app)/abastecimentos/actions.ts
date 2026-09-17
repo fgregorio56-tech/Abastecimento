@@ -23,7 +23,15 @@ function revalidateAbastecimentoPaths() {
 
 export async function updateFuelRecord(
   id: string,
-  input: { placa: string; data: string; km: string; litros: string; combustivel?: string; origem?: string },
+  input: {
+    placa: string;
+    data: string;
+    km: string;
+    litros: string;
+    motorista?: string;
+    combustivel?: string;
+    origem?: string;
+  },
 ): Promise<UpdateResult> {
   const user = await requireRole("MASTER", "EDITOR");
 
@@ -63,6 +71,7 @@ export async function updateFuelRecord(
       litros: litros !== null && Number.isFinite(litros) ? litros : null,
       ...(combustivel ? { combustivel } : {}),
       ...(origem ? { origem } : {}),
+      ...(input.motorista !== undefined ? { motorista: input.motorista || null } : {}),
       corrected: true,
       updatedById: user.id,
     },

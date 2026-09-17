@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { canEditData } from "@/lib/roles";
 import { parsePeriod } from "@/lib/period";
-import { EditableRow, type RowData } from "./EditableRow";
+import type { RowData } from "./EditableRow";
+import { FuelRecordsTable } from "./FuelRecordsTable";
 import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 50;
@@ -81,48 +82,24 @@ export default async function AbastecimentosPage({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
-        <table className="w-full min-w-[820px] text-sm">
-          <thead>
-            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-              <th className="px-3 py-2">Placa</th>
-              <th className="px-3 py-2">Data</th>
-              <th className="px-3 py-2 text-right">KM</th>
-              <th className="px-3 py-2 text-right">Litros</th>
-              <th className="px-3 py-2">Combustível</th>
-              <th className="px-3 py-2">Origem</th>
-              <th className="px-3 py-2">Posto</th>
-              <th className="px-3 py-2">Situação</th>
-              {canEdit && <th className="px-3 py-2">Ações</th>}
-            </tr>
-          </thead>
-          <tbody className="px-3">
-            {records.length === 0 && (
-              <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
-                  Nenhum abastecimento encontrado.
-                </td>
-              </tr>
-            )}
-            {records.map((r) => {
-              const row: RowData = {
-                id: r.id,
-                placaTexto: r.placaTexto,
-                data: r.data ? r.data.toISOString() : null,
-                km: r.km,
-                litros: r.litros,
-                combustivel: r.combustivel,
-                origem: r.origem,
-                posto: r.posto,
-                hasError: r.hasError,
-                errors: JSON.parse(r.errors) as string[],
-                corrected: r.corrected,
-              };
-              return <EditableRow key={r.id} row={row} canEdit={canEdit} />;
-            })}
-          </tbody>
-        </table>
-      </div>
+      <FuelRecordsTable
+        rows={records.map(
+          (r): RowData => ({
+            id: r.id,
+            placaTexto: r.placaTexto,
+            data: r.data ? r.data.toISOString() : null,
+            km: r.km,
+            litros: r.litros,
+            combustivel: r.combustivel,
+            origem: r.origem,
+            posto: r.posto,
+            hasError: r.hasError,
+            errors: JSON.parse(r.errors) as string[],
+            corrected: r.corrected,
+          }),
+        )}
+        canEdit={canEdit}
+      />
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 text-sm">

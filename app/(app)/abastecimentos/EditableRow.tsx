@@ -26,7 +26,17 @@ function toDateInputValue(iso: string | null): string {
   return iso.slice(0, 10);
 }
 
-export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }) {
+export function EditableRow({
+  row,
+  canEdit,
+  selected = false,
+  onToggleSelect,
+}: {
+  row: RowData;
+  canEdit: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
+}) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -63,6 +73,11 @@ export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }
   if (editing) {
     return (
       <tr className="border-b border-slate-100 bg-amber-50">
+        {onToggleSelect && (
+          <td className="py-2 pr-2">
+            <input type="checkbox" checked={selected} onChange={() => onToggleSelect(row.id)} />
+          </td>
+        )}
         <td className="py-2 pr-2">
           <input
             value={placa}
@@ -145,7 +160,12 @@ export function EditableRow({ row, canEdit }: { row: RowData; canEdit: boolean }
   }
 
   return (
-    <tr className={`border-b border-slate-100 ${row.hasError ? "bg-red-50/60" : ""}`}>
+    <tr className={`border-b border-slate-100 ${row.hasError ? "bg-red-50/60" : ""} ${selected ? "bg-brand-50" : ""}`}>
+      {onToggleSelect && (
+        <td className="py-2 pr-2">
+          <input type="checkbox" checked={selected} onChange={() => onToggleSelect(row.id)} />
+        </td>
+      )}
       <td className="py-2 pr-2 font-medium text-slate-900">{row.placaTexto || "—"}</td>
       <td className="py-2 pr-2 text-slate-600">{formatDate(row.data ? new Date(row.data) : null)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.km)}</td>

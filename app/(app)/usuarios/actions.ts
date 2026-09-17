@@ -97,3 +97,49 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
   revalidatePath("/ticket-log");
   return { ok: true };
 }
+
+const WIPE_CONFIRMATION_TEXT = "LIMPAR TUDO";
+
+export interface WipeDatabaseResult extends UserActionResult {
+  deleted?: { fuelRecords: number; vehicles: number; importBatches: number };
+}
+
+/**
+ * Apaga todos os abastecimentos, lotes de importação e veículos — reset
+ * total dos dados operacionais. Usuários e o próprio histórico de
+ * atividades (Ticket Log) são preservados. Exige que o usuário digite a
+ * frase de confirmação exata para reduzir o risco de exclusão acidental.
+ */
+export async function wipeDatabase(confirmText: string): Promise<WipeDatabaseResult> {
+  const me = await requireRole("MASTER");
+
+  if (confirmText.trim() !== WIPE_CONFIRMATION_TEXT) {
+    return { ok: false, error: `Digite exatamente "${WIPE_CONFIRMATION_TEXT}" para confirmar.` };
+  }
+
+  const [fuelRecords] = await prisma.$transaction([
+    prisma.fuelRecord.deleteMany({}),
+    prisma.importBatch.deleteMany({}),
+  ]);
+  const vehicles = await prisma.vehicle.deleteMany({});
+
+  await logActivity(
+    "SISTEMA",
+    `Limpou toda a base: ${fuelRecords.count} abastecimento(s), ${vehicles.count} veículo(s) removidos`,
+    me.id,
+  );
+
+  revalidatePath("/");
+  revalidatePath("/abastecimentos");
+  revalidatePath("/pendencias");
+  revalidatePath("/veiculos");
+  revalidatePath("/metas");
+  revalidatePath("/ticket-log");
+  revalidatePath("/usuarios");
+  revalidatePath("/exportar");
+
+  return {
+    ok: true,
+    deleted: { fuelRecords: fuelRecords.count, vehicles: vehicles.count, importBatches: 0 },
+  };
+}

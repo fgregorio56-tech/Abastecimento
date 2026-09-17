@@ -60,6 +60,7 @@ export const ACTIVITY_TYPES = [
   "VEICULO",
   "META",
   "USUARIO",
+  "SISTEMA",
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
@@ -70,4 +71,5 @@ export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
   VEICULO: "Veículo",
   META: "Meta",
   USUARIO: "Usuário",
+  SISTEMA: "Sistema",
 };

@@ -12,6 +12,7 @@ const TYPE_BADGE: Record<ActivityType, string> = {
   VEICULO: "bg-teal-100 text-teal-700",
   META: "bg-violet-100 text-violet-700",
   USUARIO: "bg-slate-200 text-slate-700",
+  SISTEMA: "bg-rose-200 text-rose-800",
 };
 
 export default async function TicketLogPage({

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { canEditData } from "@/lib/roles";
-import { EditableRow, type RowData } from "../abastecimentos/EditableRow";
+import type { RowData } from "../abastecimentos/EditableRow";
+import { FuelRecordsTable } from "../abastecimentos/FuelRecordsTable";
 import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
 import { getVehicleCurrentKm } from "@/lib/data";
 
@@ -60,48 +61,24 @@ export default async function PendenciasPage() {
             Ver na tela de Abastecimentos →
           </Link>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
-          <table className="w-full min-w-[820px] text-sm">
-            <thead>
-              <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="px-3 py-2">Placa</th>
-                <th className="px-3 py-2">Data</th>
-                <th className="px-3 py-2 text-right">KM</th>
-                <th className="px-3 py-2 text-right">Litros</th>
-                <th className="px-3 py-2">Combustível</th>
-                <th className="px-3 py-2">Origem</th>
-                <th className="px-3 py-2">Posto</th>
-                <th className="px-3 py-2">Situação</th>
-                {canEdit && <th className="px-3 py-2">Ações</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {errorRecords.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
-                    Nenhum abastecimento com erro. 🎉
-                  </td>
-                </tr>
-              )}
-              {errorRecords.map((r) => {
-                const row: RowData = {
-                  id: r.id,
-                  placaTexto: r.placaTexto,
-                  data: r.data ? r.data.toISOString() : null,
-                  km: r.km,
-                  litros: r.litros,
-                  combustivel: r.combustivel,
-                  origem: r.origem,
-                  posto: r.posto,
-                  hasError: r.hasError,
-                  errors: JSON.parse(r.errors) as string[],
-                  corrected: r.corrected,
-                };
-                return <EditableRow key={r.id} row={row} canEdit={canEdit} />;
-              })}
-            </tbody>
-          </table>
-        </div>
+        <FuelRecordsTable
+          rows={errorRecords.map(
+            (r): RowData => ({
+              id: r.id,
+              placaTexto: r.placaTexto,
+              data: r.data ? r.data.toISOString() : null,
+              km: r.km,
+              litros: r.litros,
+              combustivel: r.combustivel,
+              origem: r.origem,
+              posto: r.posto,
+              hasError: r.hasError,
+              errors: JSON.parse(r.errors) as string[],
+              corrected: r.corrected,
+            }),
+          )}
+          canEdit={canEdit}
+        />
       </div>
 
       <div>

@@ -103,3 +103,31 @@ export async function deleteFuelRecord(id: string): Promise<UpdateResult> {
 
   return { ok: true };
 }
+
+export interface BulkDeleteResult extends UpdateResult {
+  deletedCount?: number;
+}
+
+export async function deleteMultipleFuelRecords(ids: string[]): Promise<BulkDeleteResult> {
+  const user = await requireRole("MASTER", "EDITOR");
+
+  if (ids.length === 0) return { ok: false, error: "Nenhum registro selecionado." };
+
+  const records = await prisma.fuelRecord.findMany({
+    where: { id: { in: ids } },
+    select: { vehicleId: true },
+  });
+
+  const { count } = await prisma.fuelRecord.deleteMany({ where: { id: { in: ids } } });
+
+  const affectedVehicleIds = new Set(records.map((r) => r.vehicleId).filter((v): v is string => v !== null));
+  for (const vehicleId of affectedVehicleIds) {
+    await revalidateVehicleRecords(vehicleId);
+  }
+
+  await logActivity("EXCLUSAO", `Excluiu ${count} abastecimento(s) em lote`, user.id);
+
+  revalidateAbastecimentoPaths();
+
+  return { ok: true, deletedCount: count };
+}

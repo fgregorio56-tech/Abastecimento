@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { CreateUserForm } from "./CreateUserForm";
 import { UserRow } from "./UserRow";
+import { DangerZone } from "./DangerZone";
 
 export default async function UsuariosPage() {
   const me = await requireRole("MASTER");
@@ -44,6 +45,8 @@ export default async function UsuariosPage() {
           </tbody>
         </table>
       </div>
+
+      <DangerZone />
     </div>
   );
 }

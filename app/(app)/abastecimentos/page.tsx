@@ -46,7 +46,10 @@ export default async function AbastecimentosPage({
   }
   if (q) {
     andConditions.push({
-      OR: [{ placaTexto: { contains: q } }, { motorista: { contains: q } }],
+      OR: [
+        { placaTexto: { contains: q, mode: "insensitive" } },
+        { motorista: { contains: q, mode: "insensitive" } },
+      ],
     });
   }
   const where: Prisma.FuelRecordWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};

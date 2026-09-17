@@ -33,18 +33,21 @@ consumo, ranking de veículos e metas de média por veículo.
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Prisma + SQLite · NextAuth (Credentials) ·
+Next.js 16 (App Router) · TypeScript · Prisma + PostgreSQL · NextAuth (Credentials) ·
 Tailwind CSS · Recharts · SheetJS (xlsx)
 
 ## Como rodar localmente
 
 ```bash
 npm install
-cp .env.example .env   # ajuste NEXTAUTH_SECRET, MASTER_EMAIL e MASTER_PASSWORD
+cp .env.example .env   # ajuste DATABASE_URL, NEXTAUTH_SECRET, MASTER_EMAIL e MASTER_PASSWORD
 npx prisma migrate deploy
 npx prisma db seed      # cria o usuário mestre inicial
 npm run dev
 ```
+
+É necessário ter um banco PostgreSQL acessível (local ou na nuvem) antes de
+rodar `prisma migrate deploy` — veja a seção **Banco de dados** abaixo.
 
 Acesse [http://localhost:3000](http://localhost:3000) e entre com o e-mail e
 senha definidos em `MASTER_EMAIL` / `MASTER_PASSWORD` (padrão em
@@ -59,10 +62,35 @@ openssl rand -base64 32
 
 ## Banco de dados
 
-Por padrão usa SQLite (`prisma/dev.db`, arquivo local, ignorado pelo git).
-Para produção, aponte `DATABASE_URL` para um banco Postgres/MySQL e ajuste o
-`provider` em `prisma/schema.prisma` (o modelo evita `enum`, então funciona
-sem alterações em qualquer um dos provedores compatíveis com o Prisma).
+Usa PostgreSQL (`DATABASE_URL` no `.env`). Para desenvolvimento local, instale
+o Postgres e crie um banco vazio; para produção/hospedagem em nuvem (ex.:
+Vercel), use um provedor gerenciado como [Neon](https://neon.tech) (tem plano
+gratuito) e cole a connection string fornecida por ele em `DATABASE_URL`.
+
+## Publicar para todo mundo acessar (deploy)
+
+1. Crie um banco Postgres gratuito no [Neon](https://neon.tech) (login com
+   GitHub) e copie a "connection string" (começa com `postgresql://...`).
+2. Crie uma conta na [Vercel](https://vercel.com) (login com GitHub) e
+   importe este repositório (`fgregorio56-tech/Abastecimento`).
+3. Em **Environment Variables**, adicione:
+   - `DATABASE_URL` — a connection string do Neon
+   - `NEXTAUTH_SECRET` — gere com `openssl rand -base64 32`
+   - `NEXTAUTH_URL` — a URL pública que a Vercel vai gerar (ex.:
+     `https://abastecimento.vercel.app`)
+   - `MASTER_EMAIL`, `MASTER_PASSWORD`, `MASTER_NAME` — credenciais do
+     usuário mestre inicial
+4. Clique em **Deploy**.
+5. Depois do primeiro deploy, rode a migração e o seed contra o banco de
+   produção (uma única vez), pela sua máquina local com `DATABASE_URL`
+   apontando para o Neon:
+   ```bash
+   npx prisma migrate deploy
+   npx prisma db seed
+   ```
+6. Acesse a URL gerada pela Vercel e entre com `MASTER_EMAIL` /
+   `MASTER_PASSWORD`. Qualquer pessoa com a URL já consegue acessar a tela
+   de login — crie os demais usuários (Editor/Visualizador) em **Usuários**.
 
 ## Scripts
 

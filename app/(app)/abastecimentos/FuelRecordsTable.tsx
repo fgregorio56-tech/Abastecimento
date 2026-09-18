@@ -29,11 +29,13 @@ function SortableTh({
   align?: "left" | "right";
 }) {
   if (!href) {
-    return <th className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}>{label}</th>;
+    return (
+      <th className={`whitespace-nowrap px-3 py-2 ${align === "right" ? "text-right" : ""}`}>{label}</th>
+    );
   }
   const active = currentSort === column;
   return (
-    <th className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
+    <th className={`whitespace-nowrap px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
       <Link
         href={href}
         className={`inline-flex items-center gap-1 hover:text-brand-700 ${active ? "text-brand-700" : ""}`}
@@ -128,12 +130,12 @@ export function FuelRecordsTable({
             <SortableTh label="Data" column="data" href={sortLinks?.data} currentSort={currentSort} currentDir={currentDir} />
             <SortableTh label="KM" column="km" href={sortLinks?.km} currentSort={currentSort} currentDir={currentDir} align="right" />
             <SortableTh label="Litros" column="litros" href={sortLinks?.litros} currentSort={currentSort} currentDir={currentDir} align="right" />
-            <th className="px-3 py-2">Combustível</th>
-            <th className="px-3 py-2">Origem</th>
-            <th className="px-3 py-2">Motorista</th>
-            <th className="px-3 py-2">Posto</th>
-            <th className="px-3 py-2">Situação</th>
-            {canEdit && <th className="px-3 py-2">Ações</th>}
+            <th className="whitespace-nowrap px-3 py-2">Combustível</th>
+            <th className="whitespace-nowrap px-3 py-2">Origem</th>
+            <th className="whitespace-nowrap px-3 py-2">Motorista</th>
+            <th className="whitespace-nowrap px-3 py-2">Posto</th>
+            <th className="whitespace-nowrap px-3 py-2">Situação</th>
+            {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
           </tr>
         </thead>
         <tbody>

@@ -1,9 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import type { MetricRecord } from "@/lib/metrics";
 
-export async function getValidRecordsForMetrics(): Promise<MetricRecord[]> {
+export async function getValidRecordsForMetrics(unidade?: string): Promise<MetricRecord[]> {
   const records = await prisma.fuelRecord.findMany({
-    where: { hasError: false, vehicleId: { not: null } },
+    where: {
+      hasError: false,
+      vehicleId: { not: null },
+      ...(unidade ? { vehicle: { unidade } } : {}),
+    },
     select: {
       id: true,
       vehicleId: true,

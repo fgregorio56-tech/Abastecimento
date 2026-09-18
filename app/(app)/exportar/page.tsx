@@ -5,6 +5,7 @@ import { getValidRecordsForMetrics } from "@/lib/data";
 import { availableMonths } from "@/lib/metrics";
 import { parsePeriod } from "@/lib/period";
 import { PeriodFilter } from "../PeriodFilter";
+import { UnitFilter } from "../UnitFilter";
 
 export default async function ExportarPage({
   searchParams,
@@ -15,6 +16,7 @@ export default async function ExportarPage({
   const params = await searchParams;
   const selectedMonths = parsePeriod(params);
   const somenteCorrigidos = params.somenteCorrigidos === "1";
+  const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
   const records = await getValidRecordsForMetrics();
   const months = availableMonths(records);
@@ -30,22 +32,30 @@ export default async function ExportarPage({
             return { data: { gte: start, lt: end } };
           }),
         };
+  const whereUnidade = unidade ? { vehicle: { unidade } } : {};
 
   const totalDisponivel = await prisma.fuelRecord.count({
-    where: { hasError: false, ...(somenteCorrigidos ? { corrected: true } : {}), ...whereMonths },
+    where: {
+      hasError: false,
+      ...(somenteCorrigidos ? { corrected: true } : {}),
+      ...whereMonths,
+      ...whereUnidade,
+    },
   });
   const totalComErro = await prisma.fuelRecord.count({
-    where: { hasError: true, ...whereMonths },
+    where: { hasError: true, ...whereMonths, ...whereUnidade },
   });
 
   const downloadParams = new URLSearchParams();
   if (selectedMonths) for (const m of selectedMonths) downloadParams.append("mes", m);
   if (somenteCorrigidos) downloadParams.set("somenteCorrigidos", "1");
+  if (unidade) downloadParams.set("unidade", unidade);
 
   const toggleCorrigidosHref = (() => {
     const sp = new URLSearchParams();
     if (selectedMonths) for (const m of selectedMonths) sp.append("mes", m);
     if (!somenteCorrigidos) sp.set("somenteCorrigidos", "1");
+    if (unidade) sp.set("unidade", unidade);
     return `/exportar?${sp.toString()}`;
   })();
 
@@ -58,6 +68,8 @@ export default async function ExportarPage({
           pelo período desejado.
         </p>
       </div>
+
+      <UnitFilter initialValue={unidade} />
 
       <PeriodFilter availableMonths={months} selectedMonths={selectedMonths ? [...selectedMonths] : null} />
 

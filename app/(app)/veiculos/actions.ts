@@ -20,6 +20,7 @@ export async function updateVehicle(
     anoFabricacao: string;
     tipoVeiculo: string;
     capacidadeTanque: string;
+    unidade: string;
     ativo: boolean;
   },
 ): Promise<VehicleUpdateResult> {
@@ -36,6 +37,7 @@ export async function updateVehicle(
       anoFabricacao: input.anoFabricacao ? Number(input.anoFabricacao) : null,
       tipoVeiculo: input.tipoVeiculo || null,
       capacidadeTanque: capacidade !== null && Number.isFinite(capacidade) ? capacidade : null,
+      unidade: input.unidade || null,
       ativo: input.ativo,
     },
   });

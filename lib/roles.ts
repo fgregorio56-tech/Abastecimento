@@ -53,6 +53,16 @@ export const ORIGEM_LABELS: Record<Origem, string> = {
   INTERNO: "Interno (frota)",
 };
 
+/** Unidades/filiais da frota (lista fechada). */
+export const UNIDADES = [
+  "RETEC SIMOES FILHO",
+  "RETEC JUAZEIRO",
+  "RETEC OESTE",
+  "CVR ALTO SERTAO",
+  "CVR OESTE",
+  "CVR SAO FRANCISCO",
+];
+
 /** Sugestões de tipo de veículo (lista aberta — qualquer texto é aceito). */
 export const TIPOS_VEICULO_SUGERIDOS = [
   "¾",

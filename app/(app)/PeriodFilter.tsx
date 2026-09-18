@@ -44,7 +44,8 @@ export function PeriodFilter({
   }
 
   function apply(months: string[] | null) {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(window.location.search);
+    params.delete("mes");
     if (months !== null) {
       for (const m of months) params.append("mes", m);
     }

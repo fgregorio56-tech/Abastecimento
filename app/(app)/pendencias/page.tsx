@@ -6,19 +6,26 @@ import type { RowData } from "../abastecimentos/EditableRow";
 import { FuelRecordsTable } from "../abastecimentos/FuelRecordsTable";
 import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
 import { getVehicleCurrentKm } from "@/lib/data";
+import { UnitFilter } from "../UnitFilter";
 
-export default async function PendenciasPage() {
+export default async function PendenciasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const user = await requireUser();
   const canEdit = canEditData(user.role);
+  const params = await searchParams;
+  const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
   const [errorRecords, incompleteVehicles, correctedCount, kmMap] = await Promise.all([
     prisma.fuelRecord.findMany({
-      where: { hasError: true },
+      where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) },
       orderBy: [{ data: "desc" }],
       take: 200,
     }),
     prisma.vehicle.findMany({
-      where: { ativo: true, OR: [{ marca: null }, { modelo: null }] },
+      where: { ativo: true, OR: [{ marca: null }, { modelo: null }], ...(unidade ? { unidade } : {}) },
       orderBy: { placa: "asc" },
     }),
     prisma.fuelRecord.count({ where: { hasError: false, corrected: true } }),
@@ -36,6 +43,8 @@ export default async function PendenciasPage() {
           atenção antes de entrar nos relatórios e na exportação.
         </p>
       </div>
+
+      <UnitFilter initialValue={unidade} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-brand-100 bg-white p-4">
@@ -94,23 +103,24 @@ export default async function PendenciasPage() {
           <table className="w-full min-w-[820px] text-sm">
             <thead>
               <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="px-3 py-2">Placa</th>
-                <th className="px-3 py-2">Marca</th>
-                <th className="px-3 py-2">Modelo</th>
-                <th className="px-3 py-2">Ano modelo</th>
-                <th className="px-3 py-2">Ano fabricação</th>
-                <th className="px-3 py-2">Tipo</th>
-                <th className="px-3 py-2 text-right">Capacidade</th>
-                <th className="px-3 py-2 text-right">KM atual</th>
-                <th className="px-3 py-2 text-right">Média geral</th>
-                <th className="px-3 py-2">Situação</th>
-                {canEdit && <th className="px-3 py-2">Ações</th>}
+                <th className="whitespace-nowrap px-3 py-2">Placa</th>
+                <th className="whitespace-nowrap px-3 py-2">Marca</th>
+                <th className="whitespace-nowrap px-3 py-2">Modelo</th>
+                <th className="whitespace-nowrap px-3 py-2">Ano modelo</th>
+                <th className="whitespace-nowrap px-3 py-2">Ano fabricação</th>
+                <th className="whitespace-nowrap px-3 py-2">Tipo</th>
+                <th className="whitespace-nowrap px-3 py-2 text-right">Capacidade</th>
+                <th className="whitespace-nowrap px-3 py-2">Unidade</th>
+                <th className="whitespace-nowrap px-3 py-2 text-right">KM atual</th>
+                <th className="whitespace-nowrap px-3 py-2 text-right">Média geral</th>
+                <th className="whitespace-nowrap px-3 py-2">Situação</th>
+                {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
               </tr>
             </thead>
             <tbody>
               {incompleteVehicles.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
+                  <td colSpan={12} className="px-3 py-8 text-center text-slate-500">
                     Todos os veículos ativos têm cadastro completo. 🎉
                   </td>
                 </tr>
@@ -125,6 +135,7 @@ export default async function PendenciasPage() {
                   anoFabricacao: v.anoFabricacao,
                   tipoVeiculo: v.tipoVeiculo,
                   capacidadeTanque: v.capacidadeTanque,
+                  unidade: v.unidade,
                   ativo: v.ativo,
                   kmAtual: kmMap.get(v.id) ?? null,
                   media: null,

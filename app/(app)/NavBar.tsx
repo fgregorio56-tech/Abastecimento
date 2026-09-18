@@ -37,7 +37,7 @@ export function NavBar({
         <div className="flex items-center gap-4">
           <div className="leading-tight">
             <span className="text-lg font-extrabold tracking-tight text-slate-900">
-              frota<span className="text-brand-600">.abastecimento</span>
+              Controle de <span className="text-brand-600">Abastecimento</span>
             </span>
             <p className="hidden text-xs text-slate-400 sm:block">controle de consumo &amp; quilometragem</p>
           </div>

@@ -7,6 +7,7 @@ import { parsePeriod } from "@/lib/period";
 import { formatKm, formatLitros, formatMedia, formatCurrency } from "@/lib/format";
 import { CHART_COLORS, STATUS_COLORS } from "@/lib/chartColors";
 import { PeriodFilter } from "./PeriodFilter";
+import { UnitFilter } from "./UnitFilter";
 import { StatTile } from "./StatTile";
 import { SplitStatTile } from "./SplitStatTile";
 import { PerformanceCard } from "./PerformanceCard";
@@ -20,12 +21,17 @@ export default async function DashboardPage({
 }) {
   const params = await searchParams;
   const selectedMonths = parsePeriod(params);
+  const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
   const [records, errorCount, activeVehicles, incompleteVehicleCount, kmMap] = await Promise.all([
-    getValidRecordsForMetrics(),
-    prisma.fuelRecord.count({ where: { hasError: true } }),
-    prisma.vehicle.findMany({ where: { ativo: true } }),
-    prisma.vehicle.count({ where: { ativo: true, OR: [{ marca: null }, { modelo: null }] } }),
+    getValidRecordsForMetrics(unidade || undefined),
+    prisma.fuelRecord.count({
+      where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) },
+    }),
+    prisma.vehicle.findMany({ where: { ativo: true, ...(unidade ? { unidade } : {}) } }),
+    prisma.vehicle.count({
+      where: { ativo: true, OR: [{ marca: null }, { modelo: null }], ...(unidade ? { unidade } : {}) },
+    }),
     getVehicleCurrentKm(),
   ]);
 
@@ -100,6 +106,10 @@ export default async function DashboardPage({
             ⚠ {pendenciasAbertas} pendência(s) — revisar
           </Link>
         )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <UnitFilter initialValue={unidade} />
       </div>
 
       <PeriodFilter availableMonths={months} selectedMonths={selectedMonths ? [...selectedMonths] : null} />

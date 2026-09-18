@@ -6,6 +6,7 @@ import { parsePeriod } from "@/lib/period";
 import type { RowData } from "./EditableRow";
 import { FuelRecordsTable, type SortLinks } from "./FuelRecordsTable";
 import { SearchBox } from "../SearchBox";
+import { UnitFilter } from "../UnitFilter";
 import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 50;
@@ -24,6 +25,7 @@ export default async function AbastecimentosPage({
   const meses = parsePeriod(params);
   const q = typeof params.q === "string" ? params.q.trim() : "";
   const lote = typeof params.lote === "string" ? params.lote : undefined;
+  const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
   const sortParam = typeof params.sort === "string" ? params.sort : undefined;
   const currentSort: SortableField | undefined = SORTABLE_FIELDS.includes(sortParam as SortableField)
@@ -52,6 +54,7 @@ export default async function AbastecimentosPage({
       ],
     });
   }
+  if (unidade) andConditions.push({ vehicle: { unidade } });
   const where: Prisma.FuelRecordWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
   const orderBy: Prisma.FuelRecordOrderByWithRelationInput[] = currentSort
@@ -66,7 +69,7 @@ export default async function AbastecimentosPage({
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
-    prisma.fuelRecord.count({ where: { hasError: true } }),
+    prisma.fuelRecord.count({ where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) } }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -78,6 +81,7 @@ export default async function AbastecimentosPage({
     if (lote) sp.set("lote", lote);
     if (meses) for (const m of meses) sp.append("mes", m);
     if (q) sp.set("q", q);
+    if (unidade) sp.set("unidade", unidade);
     return sp;
   }
 
@@ -130,7 +134,10 @@ export default async function AbastecimentosPage({
         </div>
       </div>
 
-      <SearchBox initialValue={q} placeholder="Buscar por placa ou motorista..." />
+      <div className="flex flex-wrap gap-2">
+        <SearchBox initialValue={q} placeholder="Buscar por placa ou motorista..." />
+        <UnitFilter initialValue={unidade} />
+      </div>
 
       <FuelRecordsTable
         rows={records.map(

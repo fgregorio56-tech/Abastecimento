@@ -34,6 +34,7 @@ model Vehicle {
   anoFabricacao    Int?
   tipoVeiculo      String?
   capacidadeTanque Float?
+  unidade          String?
   ativo            Boolean  @default(true)
   metaManual       Float?
   createdById      String?

@@ -5,10 +5,17 @@ import { getValidRecordsForMetrics, getVehicleCurrentKm } from "@/lib/data";
 import { computeMetrics } from "@/lib/metrics";
 import { computeGoals } from "@/lib/goals";
 import { GoalRow } from "./GoalRow";
+import { UnitFilter } from "../UnitFilter";
 
-export default async function MetasPage() {
+export default async function MetasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const user = await requireUser();
   const canEdit = canEditData(user.role);
+  const params = await searchParams;
+  const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
   const [vehicles, records, kmMap] = await Promise.all([
     prisma.vehicle.findMany({ where: { ativo: true }, orderBy: { placa: "asc" } }),
@@ -18,6 +25,8 @@ export default async function MetasPage() {
 
   const { byVehicle } = computeMetrics(records, null);
 
+  // Metas comparam grupos (marca/modelo) na frota inteira, mesmo com filtro de
+  // unidade ativo — o filtro só afeta quais veículos aparecem na tela.
   const goals = computeGoals(
     vehicles.map((v) => ({
       vehicleId: v.id,
@@ -32,6 +41,7 @@ export default async function MetasPage() {
   );
 
   const infoMap = new Map(vehicles.map((v) => [v.id, v]));
+  const visibleGoals = unidade ? goals.filter((g) => infoMap.get(g.vehicleId)?.unidade === unidade) : goals;
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,29 +55,31 @@ export default async function MetasPage() {
         </p>
       </div>
 
+      <UnitFilter initialValue={unidade} />
+
       <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
             <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-              <th className="px-3 py-2">Placa</th>
-              <th className="px-3 py-2">Marca / Modelo / Ano</th>
-              <th className="px-3 py-2 text-right">KM atual</th>
-              <th className="px-3 py-2 text-right">Média atual</th>
-              <th className="px-3 py-2 text-right">Meta</th>
-              <th className="px-3 py-2 text-right">Diferença</th>
-              <th className="px-3 py-2">Origem da meta</th>
-              {canEdit && <th className="px-3 py-2">Ações</th>}
+              <th className="whitespace-nowrap px-3 py-2">Placa</th>
+              <th className="whitespace-nowrap px-3 py-2">Marca / Modelo / Ano</th>
+              <th className="whitespace-nowrap px-3 py-2 text-right">KM atual</th>
+              <th className="whitespace-nowrap px-3 py-2 text-right">Média atual</th>
+              <th className="whitespace-nowrap px-3 py-2 text-right">Meta</th>
+              <th className="whitespace-nowrap px-3 py-2 text-right">Diferença</th>
+              <th className="whitespace-nowrap px-3 py-2">Origem da meta</th>
+              {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
             </tr>
           </thead>
           <tbody>
-            {goals.length === 0 && (
+            {visibleGoals.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-3 py-8 text-center text-slate-500">
                   Nenhum veículo ativo cadastrado.
                 </td>
               </tr>
             )}
-            {goals.map((g) => {
+            {visibleGoals.map((g) => {
               const v = infoMap.get(g.vehicleId);
               return (
                 <GoalRow

@@ -182,7 +182,7 @@ export function EditableRow({
       <td className="py-2 pr-2 text-slate-500">{FUEL_TYPE_LABELS[row.combustivel as keyof typeof FUEL_TYPE_LABELS] ?? row.combustivel}</td>
       <td className="py-2 pr-2">
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+          className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
             row.origem === "INTERNO" ? "bg-teal-100 text-teal-800" : "bg-slate-100 text-slate-600"
           }`}
         >

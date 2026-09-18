@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateVehicle } from "./actions";
 import { formatKm, formatMedia } from "@/lib/format";
+import { UNIDADES } from "@/lib/roles";
 
 export interface VehicleRowData {
   id: string;
@@ -14,6 +15,7 @@ export interface VehicleRowData {
   anoFabricacao: number | null;
   tipoVeiculo: string | null;
   capacidadeTanque: number | null;
+  unidade: string | null;
   ativo: boolean;
   kmAtual: number | null;
   media: number | null;
@@ -31,6 +33,7 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
   const [anoFabricacao, setAnoFabricacao] = useState(vehicle.anoFabricacao?.toString() ?? "");
   const [tipoVeiculo, setTipoVeiculo] = useState(vehicle.tipoVeiculo ?? "");
   const [capacidadeTanque, setCapacidadeTanque] = useState(vehicle.capacidadeTanque?.toString() ?? "");
+  const [unidade, setUnidade] = useState(vehicle.unidade ?? "");
   const [ativo, setAtivo] = useState(vehicle.ativo);
 
   function save() {
@@ -42,6 +45,7 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
         anoFabricacao,
         tipoVeiculo,
         capacidadeTanque,
+        unidade,
         ativo,
       });
       setEditing(false);
@@ -83,6 +87,20 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
             className="w-20 rounded border border-slate-300 px-2 py-1 text-right text-sm"
           />
         </td>
+        <td className="px-3 py-2">
+          <select
+            value={unidade}
+            onChange={(e) => setUnidade(e.target.value)}
+            className="w-40 rounded border border-slate-300 px-2 py-1 text-sm"
+          >
+            <option value="">Sem unidade</option>
+            {UNIDADES.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </td>
         <td className="px-3 py-2 text-right tabular-nums text-slate-500">{formatKm(vehicle.kmAtual)}</td>
         <td className="px-3 py-2 text-right tabular-nums text-slate-500">{formatMedia(vehicle.media)}</td>
         <td className="px-3 py-2">
@@ -114,6 +132,7 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
       <td className="px-3 py-2 text-right tabular-nums text-slate-600">
         {vehicle.capacidadeTanque ? `${vehicle.capacidadeTanque} L` : "—"}
       </td>
+      <td className="px-3 py-2 text-slate-600">{vehicle.unidade ?? "—"}</td>
       <td className="px-3 py-2 text-right tabular-nums text-slate-600">{formatKm(vehicle.kmAtual)}</td>
       <td className="px-3 py-2 text-right tabular-nums font-medium text-slate-900">{formatMedia(vehicle.media)}</td>
       <td className="px-3 py-2">

@@ -6,8 +6,9 @@ import { getValidRecordsForMetrics, getVehicleCurrentKm } from "@/lib/data";
 import { computeMetrics } from "@/lib/metrics";
 import { VehicleRow, type VehicleRowData } from "./VehicleRow";
 import { SearchBox } from "../SearchBox";
+import { UnitFilter } from "../UnitFilter";
 
-const SORTABLE_FIELDS = ["placa", "marca", "modelo", "tipoVeiculo", "kmAtual", "media"] as const;
+const SORTABLE_FIELDS = ["placa", "marca", "modelo", "tipoVeiculo", "unidade", "kmAtual", "media"] as const;
 type SortableField = (typeof SORTABLE_FIELDS)[number];
 
 export default async function VeiculosPage({
@@ -19,6 +20,7 @@ export default async function VeiculosPage({
   const canEdit = canEditData(user.role);
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase() : "";
+  const unidade = typeof params.unidade === "string" ? params.unidade : "";
   const sortParam = typeof params.sort === "string" ? params.sort : undefined;
   const currentSort: SortableField = SORTABLE_FIELDS.includes(sortParam as SortableField)
     ? (sortParam as SortableField)
@@ -26,8 +28,8 @@ export default async function VeiculosPage({
   const currentDir: "asc" | "desc" = params.dir === "desc" ? "desc" : "asc";
 
   const [vehicles, records] = await Promise.all([
-    prisma.vehicle.findMany({ orderBy: { placa: "asc" } }),
-    getValidRecordsForMetrics(),
+    prisma.vehicle.findMany({ where: unidade ? { unidade } : undefined, orderBy: { placa: "asc" } }),
+    getValidRecordsForMetrics(unidade || undefined),
   ]);
 
   const { byVehicle } = computeMetrics(records, null);
@@ -45,6 +47,7 @@ export default async function VeiculosPage({
       anoFabricacao: v.anoFabricacao,
       tipoVeiculo: v.tipoVeiculo,
       capacidadeTanque: v.capacidadeTanque,
+      unidade: v.unidade,
       ativo: v.ativo,
       kmAtual: kmMap.get(v.id) ?? null,
       media: agg?.media ?? null,
@@ -54,7 +57,7 @@ export default async function VeiculosPage({
 
   if (q) {
     rows = rows.filter((v) =>
-      [v.placa, v.marca, v.modelo, v.tipoVeiculo].some((field) => field?.toLowerCase().includes(q)),
+      [v.placa, v.marca, v.modelo, v.tipoVeiculo, v.unidade].some((field) => field?.toLowerCase().includes(q)),
     );
   }
 
@@ -74,6 +77,7 @@ export default async function VeiculosPage({
   function baseParams() {
     const sp = new URLSearchParams();
     if (q) sp.set("q", q);
+    if (unidade) sp.set("unidade", unidade);
     return sp;
   }
 
@@ -88,7 +92,7 @@ export default async function VeiculosPage({
   function sortTh(label: string, column: SortableField, align: "left" | "right" = "left") {
     const active = currentSort === column;
     return (
-      <th key={column} className={`px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
+      <th key={column} className={`whitespace-nowrap px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
         <Link
           href={sortHref(column)}
           className={`inline-flex items-center gap-1 hover:text-brand-700 ${active ? "text-brand-700" : ""}`}
@@ -115,7 +119,10 @@ export default async function VeiculosPage({
         </Link>
       </div>
 
-      <SearchBox initialValue={q} placeholder="Buscar por placa, marca, modelo ou tipo..." />
+      <div className="flex flex-wrap gap-2">
+        <SearchBox initialValue={q} placeholder="Buscar por placa, marca, modelo ou tipo..." />
+        <UnitFilter initialValue={unidade} />
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[960px] text-sm">
@@ -124,20 +131,21 @@ export default async function VeiculosPage({
               {sortTh("Placa", "placa")}
               {sortTh("Marca", "marca")}
               {sortTh("Modelo", "modelo")}
-              <th className="px-3 py-2">Ano modelo</th>
-              <th className="px-3 py-2">Ano fabricação</th>
+              <th className="whitespace-nowrap px-3 py-2">Ano modelo</th>
+              <th className="whitespace-nowrap px-3 py-2">Ano fabricação</th>
               {sortTh("Tipo", "tipoVeiculo")}
-              <th className="px-3 py-2 text-right">Capacidade</th>
+              <th className="whitespace-nowrap px-3 py-2 text-right">Capacidade</th>
+              {sortTh("Unidade", "unidade")}
               {sortTh("KM atual", "kmAtual", "right")}
               {sortTh("Média geral", "media", "right")}
-              <th className="px-3 py-2">Situação</th>
-              {canEdit && <th className="px-3 py-2">Ações</th>}
+              <th className="whitespace-nowrap px-3 py-2">Situação</th>
+              {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
+                <td colSpan={12} className="px-3 py-8 text-center text-slate-500">
                   {vehicles.length === 0
                     ? "Nenhum veículo cadastrado. Importe uma planilha de abastecimentos para começar."
                     : "Nenhum veículo encontrado para essa busca."}

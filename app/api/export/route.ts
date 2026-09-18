@@ -12,11 +12,13 @@ export async function GET(request: NextRequest) {
 
   const months = request.nextUrl.searchParams.getAll("mes");
   const somenteCorrigidos = request.nextUrl.searchParams.get("somenteCorrigidos") === "1";
+  const unidade = request.nextUrl.searchParams.get("unidade");
 
   const where: NonNullable<Parameters<typeof prisma.fuelRecord.findMany>[0]>["where"] = {
     hasError: false,
   };
   if (somenteCorrigidos) where.corrected = true;
+  if (unidade) where.vehicle = { unidade };
   if (months.length > 0) {
     where.OR = months.map((mes) => {
       const [ano, mm] = mes.split("-").map(Number);

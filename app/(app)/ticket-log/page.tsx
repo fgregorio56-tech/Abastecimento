@@ -48,7 +48,7 @@ export default async function TicketLogPage({
       <div className="overflow-hidden rounded-xl border border-brand-100 bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
               <th className="px-3 py-2">Quando</th>
               <th className="px-3 py-2">Tipo</th>
               <th className="px-3 py-2">Descrição</th>

@@ -246,7 +246,7 @@ export default async function DashboardPage({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-brand-100 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-brand-100 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
                 <th className="py-2 pr-4">Placa</th>
                 <th className="py-2 pr-4">Marca / Modelo</th>
                 <th className="py-2 pr-4 text-right">KM rodado</th>

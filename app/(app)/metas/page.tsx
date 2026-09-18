@@ -60,7 +60,7 @@ export default async function MetasPage({
       <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
-            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
               <th className="whitespace-nowrap px-3 py-2">Placa</th>
               <th className="whitespace-nowrap px-3 py-2">Marca / Modelo / Ano</th>
               <th className="whitespace-nowrap px-3 py-2 text-right">KM atual</th>

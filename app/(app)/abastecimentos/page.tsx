@@ -7,6 +7,8 @@ import type { RowData } from "./EditableRow";
 import { FuelRecordsTable, type SortLinks } from "./FuelRecordsTable";
 import { SearchBox } from "../SearchBox";
 import { UnitFilter } from "../UnitFilter";
+import { getValidRecordsForMetrics } from "@/lib/data";
+import { computeRecordDeltas } from "@/lib/metrics";
 import type { Prisma } from "@prisma/client";
 
 const PAGE_SIZE = 50;
@@ -61,7 +63,7 @@ export default async function AbastecimentosPage({
     ? [{ [currentSort]: currentDir }]
     : [{ hasError: "desc" }, { data: "desc" }];
 
-  const [total, records, errorCount] = await Promise.all([
+  const [total, records, errorCount, validRecords] = await Promise.all([
     prisma.fuelRecord.count({ where }),
     prisma.fuelRecord.findMany({
       where,
@@ -70,7 +72,13 @@ export default async function AbastecimentosPage({
       take: PAGE_SIZE,
     }),
     prisma.fuelRecord.count({ where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) } }),
+    getValidRecordsForMetrics(),
   ]);
+
+  // Usa o histórico completo (sem paginação/filtros) pra que o KM anterior
+  // de um registro na página atual sempre aponte pro abastecimento anterior
+  // real do veículo, mesmo que ele esteja em outra página.
+  const deltaMap = computeRecordDeltas(validRecords);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const canEdit = canEditData(user.role);
@@ -140,12 +148,16 @@ export default async function AbastecimentosPage({
       </div>
 
       <FuelRecordsTable
-        rows={records.map(
-          (r): RowData => ({
+        rows={records.map((r): RowData => {
+          const delta = deltaMap.get(r.id);
+          return {
             id: r.id,
             placaTexto: r.placaTexto,
             data: r.data ? r.data.toISOString() : null,
             km: r.km,
+            kmAnterior: delta?.kmAnterior ?? null,
+            kmRodado: delta?.kmRodado ?? null,
+            media: delta?.media ?? null,
             litros: r.litros,
             combustivel: r.combustivel,
             origem: r.origem,
@@ -154,8 +166,8 @@ export default async function AbastecimentosPage({
             hasError: r.hasError,
             errors: JSON.parse(r.errors) as string[],
             corrected: r.corrected,
-          }),
-        )}
+          };
+        })}
         canEdit={canEdit}
         sortLinks={sortLinks}
         currentSort={currentSort}

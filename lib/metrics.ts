@@ -99,6 +99,50 @@ function computeDeltas(allRecords: MetricRecord[]): Delta[] {
   return deltas;
 }
 
+export interface RecordDelta {
+  kmAnterior: number | null;
+  kmRodado: number | null;
+  media: number | null;
+}
+
+/**
+ * Calcula, por abastecimento, o KM do abastecimento anterior do mesmo
+ * veículo, o KM rodado desde então e a média (km/l) daquele abastecimento
+ * específico — usando a mesma cadeia (por veículo, ordenada por data,
+ * ignorando Arla/lubrificante) que computeDeltas usa para a frota.
+ * Precisa receber o histórico completo do veículo, não apenas a página
+ * exibida, para que o primeiro registro de uma página ainda tenha
+ * referência ao abastecimento anterior real.
+ */
+export function computeRecordDeltas(allRecords: MetricRecord[]): Map<string, RecordDelta> {
+  const byVehicle = new Map<string, MetricRecord[]>();
+  for (const r of allRecords) {
+    if (!byVehicle.has(r.vehicleId)) byVehicle.set(r.vehicleId, []);
+    byVehicle.get(r.vehicleId)!.push(r);
+  }
+
+  const result = new Map<string, RecordDelta>();
+  for (const records of byVehicle.values()) {
+    const sorted = [...records].sort((a, b) => a.data.getTime() - b.data.getTime());
+    let previousComKm: MetricRecord | null = null;
+    for (const record of sorted) {
+      if (!contaParaMedia(record.combustivel)) {
+        result.set(record.id, { kmAnterior: null, kmRodado: null, media: null });
+        continue;
+      }
+      if (!previousComKm) {
+        result.set(record.id, { kmAnterior: null, kmRodado: null, media: null });
+      } else {
+        const kmRodado = record.km - previousComKm.km;
+        const media = kmRodado > 0 && record.litros > 0 ? kmRodado / record.litros : null;
+        result.set(record.id, { kmAnterior: previousComKm.km, kmRodado, media });
+      }
+      previousComKm = record;
+    }
+  }
+  return result;
+}
+
 function inPeriod(date: Date, months: Set<string> | null): boolean {
   if (!months) return true;
   return months.has(monthKey(date));

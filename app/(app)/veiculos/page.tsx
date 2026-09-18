@@ -127,7 +127,7 @@ export default async function VeiculosPage({
       <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[960px] text-sm">
           <thead>
-            <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
               {sortTh("Placa", "placa")}
               {sortTh("Marca", "marca")}
               {sortTh("Modelo", "modelo")}

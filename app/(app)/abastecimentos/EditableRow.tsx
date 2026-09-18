@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteFuelRecord, updateFuelRecord } from "./actions";
 import { ERROR_LABELS } from "@/lib/validation";
-import { formatDate, formatKm, formatLitros } from "@/lib/format";
+import { formatDate, formatKm, formatLitros, formatMedia } from "@/lib/format";
 import { FUEL_TYPES, FUEL_TYPE_LABELS, ORIGENS, ORIGEM_LABELS } from "@/lib/roles";
 
 export interface RowData {
@@ -12,6 +12,9 @@ export interface RowData {
   placaTexto: string;
   data: string | null; // ISO
   km: number | null;
+  kmAnterior: number | null;
+  kmRodado: number | null;
+  media: number | null;
   litros: number | null;
   combustivel: string;
   origem: string;
@@ -103,6 +106,9 @@ export function EditableRow({
             className="w-24 rounded border border-slate-300 px-2 py-1 text-right text-sm"
           />
         </td>
+        <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmAnterior)}</td>
+        <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmRodado)}</td>
+        <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatMedia(row.media)}</td>
         <td className="py-2 pr-2">
           <input
             value={litros}
@@ -178,6 +184,9 @@ export function EditableRow({
       <td className="py-2 pr-2 font-medium text-slate-900">{row.placaTexto || "—"}</td>
       <td className="py-2 pr-2 text-slate-600">{formatDate(row.data ? new Date(row.data) : null)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.km)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmAnterior)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmRodado)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums font-medium text-slate-700">{formatMedia(row.media)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatLitros(row.litros)}</td>
       <td className="py-2 pr-2 text-slate-500">{FUEL_TYPE_LABELS[row.combustivel as keyof typeof FUEL_TYPE_LABELS] ?? row.combustivel}</td>
       <td className="py-2 pr-2">

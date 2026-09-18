@@ -5,7 +5,8 @@ import { canEditData } from "@/lib/roles";
 import type { RowData } from "../abastecimentos/EditableRow";
 import { FuelRecordsTable } from "../abastecimentos/FuelRecordsTable";
 import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
-import { getVehicleCurrentKm } from "@/lib/data";
+import { getVehicleCurrentKm, getValidRecordsForMetrics } from "@/lib/data";
+import { computeRecordDeltas } from "@/lib/metrics";
 import { UnitFilter } from "../UnitFilter";
 
 export default async function PendenciasPage({
@@ -18,7 +19,7 @@ export default async function PendenciasPage({
   const params = await searchParams;
   const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
-  const [errorRecords, incompleteVehicles, correctedCount, kmMap] = await Promise.all([
+  const [errorRecords, incompleteVehicles, correctedCount, kmMap, validRecords] = await Promise.all([
     prisma.fuelRecord.findMany({
       where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) },
       orderBy: [{ data: "desc" }],
@@ -30,7 +31,9 @@ export default async function PendenciasPage({
     }),
     prisma.fuelRecord.count({ where: { hasError: false, corrected: true } }),
     getVehicleCurrentKm(),
+    getValidRecordsForMetrics(),
   ]);
+  const deltaMap = computeRecordDeltas(validRecords);
 
   const totalPendencias = errorRecords.length + incompleteVehicles.length;
 
@@ -71,12 +74,16 @@ export default async function PendenciasPage({
           </Link>
         </div>
         <FuelRecordsTable
-          rows={errorRecords.map(
-            (r): RowData => ({
+          rows={errorRecords.map((r): RowData => {
+            const delta = deltaMap.get(r.id);
+            return {
               id: r.id,
               placaTexto: r.placaTexto,
               data: r.data ? r.data.toISOString() : null,
               km: r.km,
+              kmAnterior: delta?.kmAnterior ?? null,
+              kmRodado: delta?.kmRodado ?? null,
+              media: delta?.media ?? null,
               litros: r.litros,
               combustivel: r.combustivel,
               origem: r.origem,
@@ -85,8 +92,8 @@ export default async function PendenciasPage({
               hasError: r.hasError,
               errors: JSON.parse(r.errors) as string[],
               corrected: r.corrected,
-            }),
-          )}
+            };
+          })}
           canEdit={canEdit}
         />
       </div>
@@ -102,7 +109,7 @@ export default async function PendenciasPage({
         <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
           <table className="w-full min-w-[820px] text-sm">
             <thead>
-              <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
                 <th className="whitespace-nowrap px-3 py-2">Placa</th>
                 <th className="whitespace-nowrap px-3 py-2">Marca</th>
                 <th className="whitespace-nowrap px-3 py-2">Modelo</th>

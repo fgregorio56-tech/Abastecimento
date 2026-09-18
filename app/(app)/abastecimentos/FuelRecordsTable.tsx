@@ -89,7 +89,7 @@ export function FuelRecordsTable({
     });
   }
 
-  const colSpan = canEdit ? 11 : 9;
+  const colSpan = canEdit ? 14 : 12;
 
   return (
     <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
@@ -113,9 +113,9 @@ export function FuelRecordsTable({
           </div>
         </div>
       )}
-      <table className="w-full min-w-[960px] text-sm">
+      <table className="w-full min-w-[1240px] text-sm">
         <thead>
-          <tr className="border-b border-brand-100 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
             {canEdit && (
               <th className="px-3 py-2">
                 <input
@@ -129,6 +129,9 @@ export function FuelRecordsTable({
             <SortableTh label="Placa" column="placaTexto" href={sortLinks?.placaTexto} currentSort={currentSort} currentDir={currentDir} />
             <SortableTh label="Data" column="data" href={sortLinks?.data} currentSort={currentSort} currentDir={currentDir} />
             <SortableTh label="KM" column="km" href={sortLinks?.km} currentSort={currentSort} currentDir={currentDir} align="right" />
+            <th className="whitespace-nowrap px-3 py-2 text-right">KM anterior</th>
+            <th className="whitespace-nowrap px-3 py-2 text-right">KM rodado</th>
+            <th className="whitespace-nowrap px-3 py-2 text-right">Média</th>
             <SortableTh label="Litros" column="litros" href={sortLinks?.litros} currentSort={currentSort} currentDir={currentDir} align="right" />
             <th className="whitespace-nowrap px-3 py-2">Combustível</th>
             <th className="whitespace-nowrap px-3 py-2">Origem</th>

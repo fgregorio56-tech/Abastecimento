@@ -36,35 +36,51 @@ const HEADER_SYNONYMS: Record<string, keyof ParsedRow> = {
   carro: "placaTexto",
   data: "data",
   dataabastecimento: "data",
+  datatransacao: "data",
+  dataemissao: "data",
+  dtabastecimento: "data",
+  inicioabastecimento: "data",
   dt: "data",
   km: "km",
   kmatual: "km",
+  kmveiculo: "km",
   hodometro: "km",
+  hodometroouhorimetro: "km",
   quilometragem: "km",
   litros: "litros",
   litragem: "litros",
   qtdlitros: "litros",
+  qtdlitro: "litros",
   quantidade: "litros",
   quantidadelitros: "litros",
   valorlitro: "valorLitro",
   vllitro: "valorLitro",
+  vlrunit: "valorLitro",
   precolitro: "valorLitro",
   valorunitario: "valorLitro",
   valortotal: "valorTotal",
+  vlrtotal: "valorTotal",
+  valoremissao: "valorTotal",
   total: "valorTotal",
   valor: "valorTotal",
   posto: "posto",
   fornecedor: "posto",
   local: "posto",
+  parceiroposto: "posto",
+  nomeestabelecimento: "posto",
   combustivel: "combustivel",
   tipocombustivel: "combustivel",
+  descrprod: "combustivel",
   origem: "origem",
   tipoabastecimento: "origem",
   internoexterno: "origem",
+  tipointernoouexterno: "origem",
   motorista: "motorista",
+  nomemotorista: "motorista",
   condutor: "motorista",
   marca: "marca",
   modelo: "modelo",
+  modeloveiculo: "modelo",
   anomodelo: "anoModelo",
   ano: "anoModelo",
   anofabricacao: "anoFabricacao",
@@ -75,21 +91,18 @@ const HEADER_SYNONYMS: Record<string, keyof ParsedRow> = {
   capacidade: "capacidadeTanque",
 };
 
-const FUEL_TYPE_SYNONYMS: Record<string, string> = {
-  diesel: "DIESEL",
-  dieseis10: "DIESEL_S10",
-  diesels10: "DIESEL_S10",
-  s10: "DIESEL_S10",
-  gasolina: "GASOLINA",
-  etanol: "ETANOL",
-  alcool: "ETANOL",
-  gnv: "GNV",
-  arla: "ARLA",
-  arla32: "ARLA",
-  lubrificante: "LUBRIFICANTE",
-  oleo: "LUBRIFICANTE",
-  oleolubrificante: "LUBRIFICANTE",
-};
+/** Classifica o combustível a partir de um texto livre (ex.: descrição do produto). */
+function classifyFuel(rawValue: string): string {
+  const norm = normalizeHeader(rawValue);
+  if (!norm) return "OUTRO";
+  if (norm.includes("arla")) return "ARLA";
+  if (norm.includes("diesel")) return norm.includes("s10") ? "DIESEL_S10" : "DIESEL";
+  if (norm.includes("gasolina")) return "GASOLINA";
+  if (norm.includes("etanol") || norm.includes("alcool")) return "ETANOL";
+  if (norm.includes("gnv")) return "GNV";
+  if (norm.includes("lubrific") || norm.includes("oleo")) return "LUBRIFICANTE";
+  return "OUTRO";
+}
 
 const ORIGEM_SYNONYMS: Record<string, string> = {
   interno: "INTERNO",
@@ -155,13 +168,43 @@ function parseNumber(value: unknown): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
+/**
+ * Planilhas exportadas de diferentes sistemas às vezes têm linhas de
+ * cabeçalho/rodapé antes da linha real de colunas (ex.: "Emissão: ...").
+ * Escolhe, entre as primeiras linhas, a que mais bate com os cabeçalhos
+ * reconhecidos, em vez de assumir sempre a linha 0.
+ */
+function findHeaderRowIndex(sheet: XLSX.WorkSheet): number {
+  const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, {
+    header: 1,
+    raw: true,
+    defval: null,
+    blankrows: false,
+  });
+
+  let bestIndex = 0;
+  let bestScore = 0;
+  for (let i = 0; i < Math.min(15, rows.length); i++) {
+    const score = rows[i].filter(
+      (cell) => cell != null && HEADER_SYNONYMS[normalizeHeader(String(cell))],
+    ).length;
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = i;
+    }
+  }
+  return bestScore >= 2 ? bestIndex : 0;
+}
+
 export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
   const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
+  const headerRowIndex = findHeaderRowIndex(sheet);
   const rawRows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, {
     defval: null,
     raw: true,
+    range: headerRowIndex,
   });
 
   return rawRows.map((row, index) => {
@@ -189,11 +232,9 @@ export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
         case "capacidadeTanque":
           mapped.capacidadeTanque = parseNumber(value);
           break;
-        case "combustivel": {
-          const norm = normalizeHeader(String(value ?? ""));
-          mapped.combustivel = FUEL_TYPE_SYNONYMS[norm] ?? "OUTRO";
+        case "combustivel":
+          mapped.combustivel = classifyFuel(String(value ?? ""));
           break;
-        }
         case "origem": {
           const norm = normalizeHeader(String(value ?? ""));
           mapped.origem = ORIGEM_SYNONYMS[norm] ?? "EXTERNO";
@@ -224,7 +265,7 @@ export function parseWorkbook(buffer: ArrayBuffer): ParsedRow[] {
       anoFabricacao: mapped.anoFabricacao ?? null,
       tipoVeiculo: mapped.tipoVeiculo ?? null,
       capacidadeTanque: mapped.capacidadeTanque ?? null,
-      linhaOriginal: index + 2,
+      linhaOriginal: index + headerRowIndex + 2,
     };
   });
 }

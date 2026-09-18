@@ -2,12 +2,16 @@ const PLACA_ANTIGA = /^[A-Z]{3}[0-9]{4}$/;
 const PLACA_MERCOSUL = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
 
 export function normalizePlaca(raw: string): string {
-  return raw
+  const clean = raw
     .toUpperCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^A-Z0-9]/g, "")
     .trim();
+  // Algumas planilhas trazem marca/modelo grudados com a placa no mesmo
+  // campo (ex.: "MERCEDES BBF5J37"). A placa real (7 caracteres) fica
+  // sempre no final do texto.
+  return clean.length > 7 ? clean.slice(-7) : clean;
 }
 
 export function isPlacaValida(raw: string): boolean {

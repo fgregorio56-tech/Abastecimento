@@ -105,6 +105,16 @@ export interface RecordDelta {
   media: number | null;
 }
 
+/** Campos mínimos necessários pra montar a cadeia de KM por veículo. */
+export interface DeltaSourceRecord {
+  id: string;
+  vehicleId: string;
+  data: Date;
+  km: number;
+  litros: number;
+  combustivel: string;
+}
+
 /**
  * Calcula, por abastecimento, o KM do abastecimento anterior do mesmo
  * veículo, o KM rodado desde então e a média (km/l) daquele abastecimento
@@ -114,8 +124,8 @@ export interface RecordDelta {
  * exibida, para que o primeiro registro de uma página ainda tenha
  * referência ao abastecimento anterior real.
  */
-export function computeRecordDeltas(allRecords: MetricRecord[]): Map<string, RecordDelta> {
-  const byVehicle = new Map<string, MetricRecord[]>();
+export function computeRecordDeltas(allRecords: DeltaSourceRecord[]): Map<string, RecordDelta> {
+  const byVehicle = new Map<string, DeltaSourceRecord[]>();
   for (const r of allRecords) {
     if (!byVehicle.has(r.vehicleId)) byVehicle.set(r.vehicleId, []);
     byVehicle.get(r.vehicleId)!.push(r);
@@ -124,7 +134,7 @@ export function computeRecordDeltas(allRecords: MetricRecord[]): Map<string, Rec
   const result = new Map<string, RecordDelta>();
   for (const records of byVehicle.values()) {
     const sorted = [...records].sort((a, b) => a.data.getTime() - b.data.getTime());
-    let previousComKm: MetricRecord | null = null;
+    let previousComKm: DeltaSourceRecord | null = null;
     for (const record of sorted) {
       if (!contaParaMedia(record.combustivel)) {
         result.set(record.id, { kmAnterior: null, kmRodado: null, media: null });

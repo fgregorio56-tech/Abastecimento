@@ -184,9 +184,9 @@ export function EditableRow({
       <td className="py-2 pr-2 font-medium text-slate-900">{row.placaTexto || "—"}</td>
       <td className="py-2 pr-2 text-slate-600">{formatDate(row.data ? new Date(row.data) : null)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.km)}</td>
-      <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmAnterior)}</td>
-      <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmRodado)}</td>
-      <td className="py-2 pr-2 text-right tabular-nums font-medium text-slate-700">{formatMedia(row.media)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.kmAnterior)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.kmRodado)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatMedia(row.media)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatLitros(row.litros)}</td>
       <td className="py-2 pr-2 text-slate-500">{FUEL_TYPE_LABELS[row.combustivel as keyof typeof FUEL_TYPE_LABELS] ?? row.combustivel}</td>
       <td className="py-2 pr-2">

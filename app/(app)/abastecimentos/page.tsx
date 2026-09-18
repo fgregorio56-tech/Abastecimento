@@ -7,7 +7,7 @@ import type { RowData } from "./EditableRow";
 import { FuelRecordsTable, type SortLinks } from "./FuelRecordsTable";
 import { SearchBox } from "../SearchBox";
 import { UnitFilter } from "../UnitFilter";
-import { getValidRecordsForMetrics } from "@/lib/data";
+import { getRecordsForKmChain } from "@/lib/data";
 import { computeRecordDeltas } from "@/lib/metrics";
 import type { Prisma } from "@prisma/client";
 
@@ -63,7 +63,7 @@ export default async function AbastecimentosPage({
     ? [{ [currentSort]: currentDir }]
     : [{ hasError: "desc" }, { data: "desc" }];
 
-  const [total, records, errorCount, validRecords] = await Promise.all([
+  const [total, records, errorCount, chainRecords] = await Promise.all([
     prisma.fuelRecord.count({ where }),
     prisma.fuelRecord.findMany({
       where,
@@ -72,13 +72,13 @@ export default async function AbastecimentosPage({
       take: PAGE_SIZE,
     }),
     prisma.fuelRecord.count({ where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) } }),
-    getValidRecordsForMetrics(),
+    getRecordsForKmChain(),
   ]);
 
-  // Usa o histórico completo (sem paginação/filtros) pra que o KM anterior
-  // de um registro na página atual sempre aponte pro abastecimento anterior
-  // real do veículo, mesmo que ele esteja em outra página.
-  const deltaMap = computeRecordDeltas(validRecords);
+  // Usa o histórico completo (sem paginação/filtros, incluindo registros com
+  // erro) pra que o KM anterior de um registro na página atual sempre
+  // aponte pro abastecimento anterior real do veículo.
+  const deltaMap = computeRecordDeltas(chainRecords);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const canEdit = canEditData(user.role);

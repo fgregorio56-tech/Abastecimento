@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { MetricRecord } from "@/lib/metrics";
+import type { MetricRecord, DeltaSourceRecord } from "@/lib/metrics";
 
 export async function getValidRecordsForMetrics(unidade?: string): Promise<MetricRecord[]> {
   const records = await prisma.fuelRecord.findMany({
@@ -37,6 +37,34 @@ export async function getValidRecordsForMetrics(unidade?: string): Promise<Metri
       combustivel: r.combustivel,
       origem: r.origem,
       valorTotal: r.valorTotal,
+    });
+  }
+  return result;
+}
+
+/**
+ * Registros para calcular a cadeia de KM anterior/rodado/média por
+ * abastecimento (ver computeRecordDeltas). Diferente de
+ * getValidRecordsForMetrics, inclui também abastecimentos com erro — são
+ * justamente os que mais precisam desse contexto (ex.: "KM menor que o
+ * anterior" só faz sentido revisar vendo o KM anterior de verdade).
+ */
+export async function getRecordsForKmChain(): Promise<DeltaSourceRecord[]> {
+  const records = await prisma.fuelRecord.findMany({
+    where: { vehicleId: { not: null } },
+    select: { id: true, vehicleId: true, data: true, km: true, litros: true, combustivel: true },
+  });
+
+  const result: DeltaSourceRecord[] = [];
+  for (const r of records) {
+    if (!r.vehicleId || !r.data || r.km === null) continue;
+    result.push({
+      id: r.id,
+      vehicleId: r.vehicleId,
+      data: r.data,
+      km: r.km,
+      litros: r.litros ?? 0,
+      combustivel: r.combustivel,
     });
   }
   return result;

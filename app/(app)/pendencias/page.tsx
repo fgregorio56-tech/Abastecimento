@@ -5,7 +5,7 @@ import { canEditData } from "@/lib/roles";
 import type { RowData } from "../abastecimentos/EditableRow";
 import { FuelRecordsTable } from "../abastecimentos/FuelRecordsTable";
 import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
-import { getVehicleCurrentKm, getValidRecordsForMetrics } from "@/lib/data";
+import { getVehicleCurrentKm, getRecordsForKmChain } from "@/lib/data";
 import { computeRecordDeltas } from "@/lib/metrics";
 import { UnitFilter } from "../UnitFilter";
 
@@ -19,7 +19,7 @@ export default async function PendenciasPage({
   const params = await searchParams;
   const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
-  const [errorRecords, incompleteVehicles, correctedCount, kmMap, validRecords] = await Promise.all([
+  const [errorRecords, incompleteVehicles, correctedCount, kmMap, chainRecords] = await Promise.all([
     prisma.fuelRecord.findMany({
       where: { hasError: true, ...(unidade ? { vehicle: { unidade } } : {}) },
       orderBy: [{ data: "desc" }],
@@ -31,9 +31,9 @@ export default async function PendenciasPage({
     }),
     prisma.fuelRecord.count({ where: { hasError: false, corrected: true } }),
     getVehicleCurrentKm(),
-    getValidRecordsForMetrics(),
+    getRecordsForKmChain(),
   ]);
-  const deltaMap = computeRecordDeltas(validRecords);
+  const deltaMap = computeRecordDeltas(chainRecords);
 
   const totalPendencias = errorRecords.length + incompleteVehicles.length;
 

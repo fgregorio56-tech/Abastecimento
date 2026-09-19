@@ -138,7 +138,11 @@ export function FuelRecordsTable({
             <th className="whitespace-nowrap px-3 py-2">Motorista</th>
             <th className="whitespace-nowrap px-3 py-2">Posto</th>
             <th className="whitespace-nowrap px-3 py-2">Situação</th>
-            {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
+            {canEdit && (
+              <th className="sticky right-0 whitespace-nowrap border-l border-brand-100 bg-slate-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
+                Ações
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>

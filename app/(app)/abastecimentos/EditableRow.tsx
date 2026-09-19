@@ -154,7 +154,7 @@ export function EditableRow({
         <td className="py-2 pr-2 text-xs text-red-600">
           {error}
         </td>
-        <td className="flex gap-2 py-2 pr-2">
+        <td className="sticky right-0 flex gap-2 border-l border-slate-200 bg-amber-50 py-2 pl-2 pr-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
           <button
             onClick={save}
             disabled={isPending}
@@ -174,8 +174,10 @@ export function EditableRow({
     );
   }
 
+  const rowBg = row.hasError ? "bg-red-50" : selected ? "bg-brand-50" : "bg-white";
+
   return (
-    <tr className={`border-b border-slate-100 ${row.hasError ? "bg-red-50/60" : ""} ${selected ? "bg-brand-50" : ""}`}>
+    <tr className={`border-b border-slate-100 ${rowBg}`}>
       {onToggleSelect && (
         <td className="py-2 pr-2">
           <input type="checkbox" checked={selected} onChange={() => onToggleSelect(row.id)} />
@@ -222,7 +224,9 @@ export function EditableRow({
         )}
       </td>
       {canEdit && (
-        <td className="flex gap-2 py-2 pr-2">
+        <td
+          className={`sticky right-0 flex gap-2 border-l border-slate-200 py-2 pl-2 pr-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)] ${rowBg}`}
+        >
           <button
             onClick={() => setEditing(true)}
             className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"

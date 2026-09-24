@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f2ea;
-  --foreground: #2a2118;
+  --background: #f3faf9;
+  --foreground: #1c2624;
 
-  --brand-50: #fbf1ea;
-  --brand-100: #f5e1d3;
-  --brand-200: #e9c2a6;
-  --brand-300: #da9d75;
-  --brand-400: #c97a4c;
-  --brand-500: #b8592c;
-  --brand-600: #9c4523;
-  --brand-700: #7d371d;
-  --brand-800: #602a17;
-  --brand-900: #452010;
+  /* Paleta baseada no teal do Grupo GVC (#00aa8e, extraído da logo). */
+  --brand-50: #e6faf6;
+  --brand-100: #ccf5ec;
+  --brand-200: #99ebd9;
+  --brand-300: #5cdac0;
+  --brand-400: #22c2a3;
+  --brand-500: #00aa8e;
+  --brand-600: #00967d;
+  --brand-700: #007d68;
+  --brand-800: #006453;
+  --brand-900: #004a3d;
 }
 
 @theme inline {

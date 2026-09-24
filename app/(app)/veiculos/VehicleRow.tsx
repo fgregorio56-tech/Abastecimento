@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { updateVehicle } from "./actions";
+import { updateVehicle, deleteVehicle } from "./actions";
 import { formatKm, formatMedia } from "@/lib/format";
 import { UNIDADES } from "@/lib/roles";
 
@@ -49,6 +49,18 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
         ativo,
       });
       setEditing(false);
+      router.refresh();
+    });
+  }
+
+  function remove() {
+    const aviso =
+      vehicle.registros > 0
+        ? `Excluir o veículo ${vehicle.placa}? Ele tem ${vehicle.registros} abastecimento(s) no histórico — eles não serão apagados, mas ficam sem veículo vinculado até serem reassociados.`
+        : `Excluir o veículo ${vehicle.placa}?`;
+    if (!confirm(aviso)) return;
+    startTransition(async () => {
+      await deleteVehicle(vehicle.id);
       router.refresh();
     });
   }
@@ -109,13 +121,15 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
             Ativo
           </label>
         </td>
-        <td className="flex gap-2 px-3 py-2">
-          <button onClick={save} disabled={isPending} className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60">
-            Salvar
-          </button>
-          <button onClick={() => setEditing(false)} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50">
-            Cancelar
-          </button>
+        <td className="sticky right-0 border-l border-slate-200 bg-amber-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
+          <div className="flex gap-2">
+            <button onClick={save} disabled={isPending} className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60">
+              Salvar
+            </button>
+            <button onClick={() => setEditing(false)} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50">
+              Cancelar
+            </button>
+          </div>
         </td>
       </tr>
     );
@@ -143,10 +157,19 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
         )}
       </td>
       {canEdit && (
-        <td className="px-3 py-2">
-          <button onClick={() => setEditing(true)} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
-            Editar
-          </button>
+        <td className="sticky right-0 border-l border-slate-200 bg-white px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
+          <div className="flex gap-2">
+            <button onClick={() => setEditing(true)} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+              Editar
+            </button>
+            <button
+              onClick={remove}
+              disabled={isPending}
+              className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+            >
+              Excluir
+            </button>
+          </div>
         </td>
       )}
     </tr>

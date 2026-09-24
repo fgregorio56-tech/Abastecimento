@@ -5,6 +5,7 @@ import { canEditData } from "@/lib/roles";
 import type { RowData } from "../abastecimentos/EditableRow";
 import { FuelRecordsTable } from "../abastecimentos/FuelRecordsTable";
 import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
+import { VEHICLE_COL_WIDTHS } from "../veiculos/columnWidths";
 import { getVehicleCurrentKm, getRecordsForKmChain } from "@/lib/data";
 import { computeRecordDeltas } from "@/lib/metrics";
 import { UnitFilter } from "../UnitFilter";
@@ -107,7 +108,38 @@ export default async function PendenciasPage({
           entram na comparação de metas por grupo (marca/modelo) até serem completados.
         </p>
         <div className="max-h-[70vh] overflow-auto rounded-xl border border-brand-100 bg-white">
-          <table className="w-full min-w-[820px] text-sm">
+          <table
+            className="table-fixed text-sm"
+            style={{
+              width:
+                VEHICLE_COL_WIDTHS.placa +
+                VEHICLE_COL_WIDTHS.marca +
+                VEHICLE_COL_WIDTHS.modelo +
+                VEHICLE_COL_WIDTHS.anoModelo +
+                VEHICLE_COL_WIDTHS.anoFabricacao +
+                VEHICLE_COL_WIDTHS.tipo +
+                VEHICLE_COL_WIDTHS.capacidade +
+                VEHICLE_COL_WIDTHS.unidade +
+                VEHICLE_COL_WIDTHS.kmAtual +
+                VEHICLE_COL_WIDTHS.media +
+                VEHICLE_COL_WIDTHS.situacao +
+                (canEdit ? VEHICLE_COL_WIDTHS.acoes : 0),
+            }}
+          >
+            <colgroup>
+              <col style={{ width: VEHICLE_COL_WIDTHS.placa }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.marca }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.modelo }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.anoModelo }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.anoFabricacao }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.tipo }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.capacidade }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.unidade }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.kmAtual }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.media }} />
+              <col style={{ width: VEHICLE_COL_WIDTHS.situacao }} />
+              {canEdit && <col style={{ width: VEHICLE_COL_WIDTHS.acoes }} />}
+            </colgroup>
             <thead>
               <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
                 <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Placa</th>
@@ -121,7 +153,11 @@ export default async function PendenciasPage({
                 <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">KM atual</th>
                 <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Média geral</th>
                 <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Situação</th>
-                {canEdit && <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ações</th>}
+                {canEdit && (
+                  <th className="sticky right-0 top-0 z-20 whitespace-nowrap border-l border-brand-100 bg-slate-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
+                    Ações
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>

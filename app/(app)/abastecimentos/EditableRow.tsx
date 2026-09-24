@@ -143,6 +143,9 @@ export function EditableRow({
             ))}
           </select>
         </td>
+        <td className="py-2 pr-2 text-xs text-red-600">
+          {error}
+        </td>
         <td className="py-2 pr-2">
           <input
             value={motorista}
@@ -151,24 +154,23 @@ export function EditableRow({
           />
         </td>
         <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
-        <td className="py-2 pr-2 text-xs text-red-600">
-          {error}
-        </td>
-        <td className="sticky right-0 flex gap-2 border-l border-slate-200 bg-amber-50 py-2 pl-2 pr-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
-          <button
-            onClick={save}
-            disabled={isPending}
-            className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          >
-            Salvar
-          </button>
-          <button
-            onClick={() => setEditing(false)}
-            disabled={isPending}
-            className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
-          >
-            Cancelar
-          </button>
+        <td className="sticky right-0 border-l border-slate-200 bg-amber-50 py-2 pl-2 pr-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
+          <div className="flex gap-2">
+            <button
+              onClick={save}
+              disabled={isPending}
+              className="rounded bg-brand-600 px-2 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            >
+              Salvar
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              disabled={isPending}
+              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+            >
+              Cancelar
+            </button>
+          </div>
         </td>
       </tr>
     );
@@ -200,8 +202,6 @@ export function EditableRow({
           {ORIGEM_LABELS[row.origem as keyof typeof ORIGEM_LABELS] ?? row.origem}
         </span>
       </td>
-      <td className="py-2 pr-2 text-slate-500">{row.motorista ?? "—"}</td>
-      <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
       <td className="py-2 pr-2">
         {row.hasError ? (
           <div className="flex flex-wrap gap-1">
@@ -223,23 +223,27 @@ export function EditableRow({
           <span className="text-xs text-slate-400">OK</span>
         )}
       </td>
+      <td className="py-2 pr-2 text-slate-500">{row.motorista ?? "—"}</td>
+      <td className="py-2 pr-2 text-slate-500">{row.posto ?? "—"}</td>
       {canEdit && (
         <td
-          className={`sticky right-0 flex gap-2 border-l border-slate-200 py-2 pl-2 pr-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)] ${rowBg}`}
+          className={`sticky right-0 border-l border-slate-200 py-2 pl-2 pr-2 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)] ${rowBg}`}
         >
-          <button
-            onClick={() => setEditing(true)}
-            className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Editar
-          </button>
-          <button
-            onClick={remove}
-            disabled={isPending}
-            className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-          >
-            Excluir
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setEditing(true)}
+              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Editar
+            </button>
+            <button
+              onClick={remove}
+              disabled={isPending}
+              className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+            >
+              Excluir
+            </button>
+          </div>
         </td>
       )}
     </tr>

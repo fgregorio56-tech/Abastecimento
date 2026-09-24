@@ -92,7 +92,10 @@ export default async function VeiculosPage({
   function sortTh(label: string, column: SortableField, align: "left" | "right" = "left") {
     const active = currentSort === column;
     return (
-      <th key={column} className={`whitespace-nowrap px-3 py-2 ${align === "right" ? "text-right" : ""}`}>
+      <th
+        key={column}
+        className={`sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 ${align === "right" ? "text-right" : ""}`}
+      >
         <Link
           href={sortHref(column)}
           className={`inline-flex items-center gap-1 hover:text-brand-700 ${active ? "text-brand-700" : ""}`}
@@ -124,22 +127,22 @@ export default async function VeiculosPage({
         <UnitFilter initialValue={unidade} />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
+      <div className="max-h-[70vh] overflow-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full min-w-[960px] text-sm">
           <thead>
             <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
               {sortTh("Placa", "placa")}
               {sortTh("Marca", "marca")}
               {sortTh("Modelo", "modelo")}
-              <th className="whitespace-nowrap px-3 py-2">Ano modelo</th>
-              <th className="whitespace-nowrap px-3 py-2">Ano fabricação</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ano modelo</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ano fabricação</th>
               {sortTh("Tipo", "tipoVeiculo")}
-              <th className="whitespace-nowrap px-3 py-2 text-right">Capacidade</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Capacidade</th>
               {sortTh("Unidade", "unidade")}
               {sortTh("KM atual", "kmAtual", "right")}
               {sortTh("Média geral", "media", "right")}
-              <th className="whitespace-nowrap px-3 py-2">Situação</th>
-              {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Situação</th>
+              {canEdit && <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ações</th>}
             </tr>
           </thead>
           <tbody>

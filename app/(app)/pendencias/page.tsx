@@ -106,22 +106,22 @@ export default async function PendenciasPage({
           Veículos criados automaticamente durante a importação, sem marca/modelo cadastrados — não
           entram na comparação de metas por grupo (marca/modelo) até serem completados.
         </p>
-        <div className="overflow-x-auto rounded-xl border border-brand-100 bg-white">
+        <div className="max-h-[70vh] overflow-auto rounded-xl border border-brand-100 bg-white">
           <table className="w-full min-w-[820px] text-sm">
             <thead>
               <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
-                <th className="whitespace-nowrap px-3 py-2">Placa</th>
-                <th className="whitespace-nowrap px-3 py-2">Marca</th>
-                <th className="whitespace-nowrap px-3 py-2">Modelo</th>
-                <th className="whitespace-nowrap px-3 py-2">Ano modelo</th>
-                <th className="whitespace-nowrap px-3 py-2">Ano fabricação</th>
-                <th className="whitespace-nowrap px-3 py-2">Tipo</th>
-                <th className="whitespace-nowrap px-3 py-2 text-right">Capacidade</th>
-                <th className="whitespace-nowrap px-3 py-2">Unidade</th>
-                <th className="whitespace-nowrap px-3 py-2 text-right">KM atual</th>
-                <th className="whitespace-nowrap px-3 py-2 text-right">Média geral</th>
-                <th className="whitespace-nowrap px-3 py-2">Situação</th>
-                {canEdit && <th className="whitespace-nowrap px-3 py-2">Ações</th>}
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Placa</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Marca</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Modelo</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ano modelo</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ano fabricação</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Tipo</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Capacidade</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Unidade</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">KM atual</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Média geral</th>
+                <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Situação</th>
+                {canEdit && <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ações</th>}
               </tr>
             </thead>
             <tbody>

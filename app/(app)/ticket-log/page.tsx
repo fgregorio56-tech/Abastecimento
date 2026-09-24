@@ -45,14 +45,14 @@ export default async function TicketLogPage({
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-brand-100 bg-white">
+      <div className="max-h-[70vh] overflow-auto rounded-xl border border-brand-100 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
-              <th className="px-3 py-2">Quando</th>
-              <th className="px-3 py-2">Tipo</th>
-              <th className="px-3 py-2">Descrição</th>
-              <th className="px-3 py-2">Usuário</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Quando</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Tipo</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Descrição</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Usuário</th>
             </tr>
           </thead>
           <tbody>
@@ -66,7 +66,7 @@ export default async function TicketLogPage({
             {logs.map((log) => (
               <tr key={log.id} className="border-b border-slate-100">
                 <td className="whitespace-nowrap px-3 py-2 text-slate-500">
-                  {log.createdAt.toLocaleString("pt-BR", { timeZone: "UTC" })}
+                  {log.createdAt.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
                 </td>
                 <td className="px-3 py-2">
                   <span

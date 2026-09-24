@@ -59,8 +59,12 @@ export default async function AbastecimentosPage({
   if (unidade) andConditions.push({ vehicle: { unidade } });
   const where: Prisma.FuelRecordWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
+  // Ordenando por Placa, agrupa também por data (crescente) dentro de cada
+  // veículo, para dar pra acompanhar a evolução do KM na sequência certa.
   const orderBy: Prisma.FuelRecordOrderByWithRelationInput[] = currentSort
-    ? [{ [currentSort]: currentDir }]
+    ? currentSort === "placaTexto"
+      ? [{ placaTexto: currentDir }, { data: "asc" }]
+      : [{ [currentSort]: currentDir }]
     : [{ hasError: "desc" }, { data: "desc" }];
 
   const [total, records, errorCount, chainRecords] = await Promise.all([

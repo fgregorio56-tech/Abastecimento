@@ -119,17 +119,16 @@ export interface DeltaSourceRecord {
 
 /**
  * Calcula, por abastecimento, o KM do abastecimento anterior do mesmo
- * veículo (o abastecimento de KM mais recente que o antecede, seja de
- * combustível, Arla ou lubrificante — é sempre uma leitura real do
- * odômetro), o KM rodado desde então e a média (km/l) daquele
- * abastecimento específico (só calculada quando o combustível do próprio
- * registro conta pra média — Arla/lubrificante nunca têm média). Um
- * usuário pode sobrescrever manualmente o KM anterior de um registro
- * (kmAnteriorManual) quando o histórico no sistema está incompleto (ex.:
- * primeiro abastecimento importado de um veículo que já rodava antes).
- * Precisa receber o histórico completo do veículo, não apenas a página
- * exibida, para que o primeiro registro de uma página ainda tenha
- * referência ao abastecimento anterior real.
+ * veículo, o KM rodado desde então e a média (km/l) daquele abastecimento
+ * específico — usando a mesma cadeia (por veículo, ordenada por data,
+ * ignorando Arla/lubrificante) que computeDeltas usa para a frota, já que
+ * eles não entram no cálculo de km/l. Um usuário pode sobrescrever
+ * manualmente o KM anterior de um registro (kmAnteriorManual) quando o
+ * histórico no sistema está incompleto (ex.: primeiro abastecimento
+ * importado de um veículo que já rodava antes). Precisa receber o
+ * histórico completo do veículo, não apenas a página exibida, para que o
+ * primeiro registro de uma página ainda tenha referência ao abastecimento
+ * anterior real.
  */
 export function computeRecordDeltas(allRecords: DeltaSourceRecord[]): Map<string, RecordDelta> {
   const byVehicle = new Map<string, DeltaSourceRecord[]>();
@@ -141,20 +140,21 @@ export function computeRecordDeltas(allRecords: DeltaSourceRecord[]): Map<string
   const result = new Map<string, RecordDelta>();
   for (const records of byVehicle.values()) {
     const sorted = [...records].sort((a, b) => a.data.getTime() - b.data.getTime());
-    let previous: DeltaSourceRecord | null = null;
+    let previousComKm: DeltaSourceRecord | null = null;
     for (const record of sorted) {
-      const kmAnterior = record.kmAnteriorManual ?? previous?.km ?? null;
+      if (!contaParaMedia(record.combustivel)) {
+        result.set(record.id, { kmAnterior: record.kmAnteriorManual ?? null, kmRodado: null, media: null });
+        continue;
+      }
+      const kmAnterior = record.kmAnteriorManual ?? previousComKm?.km ?? null;
       if (kmAnterior === null) {
         result.set(record.id, { kmAnterior: null, kmRodado: null, media: null });
       } else {
         const kmRodado = record.km - kmAnterior;
-        const media =
-          contaParaMedia(record.combustivel) && kmRodado > 0 && record.litros > 0
-            ? kmRodado / record.litros
-            : null;
+        const media = kmRodado > 0 && record.litros > 0 ? kmRodado / record.litros : null;
         result.set(record.id, { kmAnterior, kmRodado, media });
       }
-      previous = record;
+      previousComKm = record;
     }
   }
   return result;

@@ -160,6 +160,7 @@ export default async function AbastecimentosPage({
             data: r.data ? r.data.toISOString() : null,
             km: r.km,
             kmAnterior: delta?.kmAnterior ?? null,
+            kmAnteriorManual: r.kmAnteriorManual,
             kmRodado: delta?.kmRodado ?? null,
             media: delta?.media ?? null,
             litros: r.litros,

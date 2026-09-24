@@ -13,6 +13,8 @@ export interface RowData {
   data: string | null; // ISO
   km: number | null;
   kmAnterior: number | null;
+  /** Sobrescrita manual do KM anterior, se houver (para preencher a edição). */
+  kmAnteriorManual: number | null;
   kmRodado: number | null;
   media: number | null;
   litros: number | null;
@@ -49,6 +51,7 @@ export function EditableRow({
   const [placa, setPlaca] = useState(row.placaTexto);
   const [data, setData] = useState(toDateInputValue(row.data));
   const [km, setKm] = useState(row.km?.toString() ?? "");
+  const [kmAnterior, setKmAnterior] = useState(row.kmAnteriorManual?.toString() ?? "");
   const [litros, setLitros] = useState(row.litros?.toString() ?? "");
   const [combustivel, setCombustivel] = useState(row.combustivel);
   const [origem, setOrigem] = useState(row.origem);
@@ -57,7 +60,16 @@ export function EditableRow({
   function save() {
     setError(null);
     startTransition(async () => {
-      const result = await updateFuelRecord(row.id, { placa, data, km, litros, combustivel, origem, motorista });
+      const result = await updateFuelRecord(row.id, {
+        placa,
+        data,
+        km,
+        kmAnterior,
+        litros,
+        combustivel,
+        origem,
+        motorista,
+      });
       if (!result.ok) {
         setError(result.error ?? "Erro ao salvar.");
         return;
@@ -106,7 +118,16 @@ export function EditableRow({
             className="w-24 rounded border border-slate-300 px-2 py-1 text-right text-sm"
           />
         </td>
-        <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmAnterior)}</td>
+        <td className="py-2 pr-2">
+          <input
+            value={kmAnterior}
+            onChange={(e) => setKmAnterior(e.target.value)}
+            placeholder={row.kmAnterior?.toString() ?? "—"}
+            inputMode="decimal"
+            title="Deixe em branco para calcular automaticamente pelo abastecimento anterior"
+            className="w-24 rounded border border-slate-300 px-2 py-1 text-right text-sm"
+          />
+        </td>
         <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatKm(row.kmRodado)}</td>
         <td className="py-2 pr-2 text-right tabular-nums text-slate-500">{formatMedia(row.media)}</td>
         <td className="py-2 pr-2">
@@ -188,7 +209,14 @@ export function EditableRow({
       <td className="py-2 pr-2 font-medium text-slate-900">{row.placaTexto || "—"}</td>
       <td className="py-2 pr-2 text-slate-600">{formatDate(row.data ? new Date(row.data) : null)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.km)}</td>
-      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.kmAnterior)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">
+        {formatKm(row.kmAnterior)}
+        {row.kmAnteriorManual !== null && (
+          <span className="ml-1 text-brand-600" title="KM anterior definido manualmente">
+            ✎
+          </span>
+        )}
+      </td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.kmRodado)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatMedia(row.media)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatLitros(row.litros)}</td>

@@ -52,7 +52,15 @@ export async function getValidRecordsForMetrics(unidade?: string): Promise<Metri
 export async function getRecordsForKmChain(): Promise<DeltaSourceRecord[]> {
   const records = await prisma.fuelRecord.findMany({
     where: { vehicleId: { not: null } },
-    select: { id: true, vehicleId: true, data: true, km: true, litros: true, combustivel: true },
+    select: {
+      id: true,
+      vehicleId: true,
+      data: true,
+      km: true,
+      litros: true,
+      combustivel: true,
+      kmAnteriorManual: true,
+    },
   });
 
   const result: DeltaSourceRecord[] = [];
@@ -65,6 +73,7 @@ export async function getRecordsForKmChain(): Promise<DeltaSourceRecord[]> {
       km: r.km,
       litros: r.litros ?? 0,
       combustivel: r.combustivel,
+      kmAnteriorManual: r.kmAnteriorManual,
     });
   }
   return result;

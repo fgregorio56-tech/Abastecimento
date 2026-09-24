@@ -27,6 +27,7 @@ export async function updateFuelRecord(
     placa: string;
     data: string;
     km: string;
+    kmAnterior?: string;
     litros: string;
     motorista?: string;
     combustivel?: string;
@@ -41,6 +42,10 @@ export async function updateFuelRecord(
   const placaTexto = normalizePlaca(input.placa);
   const parsedDate = input.data ? new Date(`${input.data}T12:00:00Z`) : null;
   const km = input.km === "" ? null : Number(input.km.replace(",", "."));
+  const kmAnteriorManual =
+    input.kmAnterior === undefined || input.kmAnterior === ""
+      ? null
+      : Number(input.kmAnterior.replace(",", "."));
   const litros = input.litros === "" ? null : Number(input.litros.replace(",", "."));
   const combustivel = input.combustivel && FUEL_TYPES.includes(input.combustivel as (typeof FUEL_TYPES)[number])
     ? input.combustivel
@@ -68,6 +73,7 @@ export async function updateFuelRecord(
       vehicleId,
       data: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : null,
       km: km !== null && Number.isFinite(km) ? km : null,
+      kmAnteriorManual: kmAnteriorManual !== null && Number.isFinite(kmAnteriorManual) ? kmAnteriorManual : null,
       litros: litros !== null && Number.isFinite(litros) ? litros : null,
       ...(combustivel ? { combustivel } : {}),
       ...(origem ? { origem } : {}),

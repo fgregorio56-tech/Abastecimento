@@ -62,20 +62,21 @@ model ImportBatch {
 // Combustivel: "DIESEL" | "DIESEL_S10" | "GASOLINA" | "ETANOL" | "GNV" | "ARLA" | "LUBRIFICANTE" | "OUTRO" (ver lib/roles.ts)
 // Origem: "INTERNO" | "EXTERNO" (ver lib/roles.ts)
 model FuelRecord {
-  id          String    @id @default(cuid())
-  placaTexto  String
-  vehicleId   String?
-  vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
-  data        DateTime?
-  km          Float?
-  litros      Float?
-  valorLitro  Float?
-  valorTotal  Float?
-  posto       String?
-  combustivel String    @default("DIESEL")
-  origem      String    @default("EXTERNO")
-  motorista   String?
-  observacao  String?
+  id               String    @id @default(cuid())
+  placaTexto       String
+  vehicleId        String?
+  vehicle          Vehicle?  @relation(fields: [vehicleId], references: [id])
+  data             DateTime?
+  km               Float?
+  litros           Float?
+  valorLitro       Float?
+  valorTotal       Float?
+  posto            String?
+  combustivel      String    @default("DIESEL")
+  kmAnteriorManual Float?
+  origem           String    @default("EXTERNO")
+  motorista        String?
+  observacao       String?
 
   hasError  Boolean @default(false)
   errors    String  @default("[]")

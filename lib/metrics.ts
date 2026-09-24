@@ -113,13 +113,20 @@ export interface DeltaSourceRecord {
   km: number;
   litros: number;
   combustivel: string;
+  /** Sobrescrita manual do KM anterior (ver campo Vehicle.metaManual). */
+  kmAnteriorManual?: number | null;
 }
 
 /**
  * Calcula, por abastecimento, o KM do abastecimento anterior do mesmo
- * veículo, o KM rodado desde então e a média (km/l) daquele abastecimento
- * específico — usando a mesma cadeia (por veículo, ordenada por data,
- * ignorando Arla/lubrificante) que computeDeltas usa para a frota.
+ * veículo (o abastecimento de KM mais recente que o antecede, seja de
+ * combustível, Arla ou lubrificante — é sempre uma leitura real do
+ * odômetro), o KM rodado desde então e a média (km/l) daquele
+ * abastecimento específico (só calculada quando o combustível do próprio
+ * registro conta pra média — Arla/lubrificante nunca têm média). Um
+ * usuário pode sobrescrever manualmente o KM anterior de um registro
+ * (kmAnteriorManual) quando o histórico no sistema está incompleto (ex.:
+ * primeiro abastecimento importado de um veículo que já rodava antes).
  * Precisa receber o histórico completo do veículo, não apenas a página
  * exibida, para que o primeiro registro de uma página ainda tenha
  * referência ao abastecimento anterior real.
@@ -134,20 +141,20 @@ export function computeRecordDeltas(allRecords: DeltaSourceRecord[]): Map<string
   const result = new Map<string, RecordDelta>();
   for (const records of byVehicle.values()) {
     const sorted = [...records].sort((a, b) => a.data.getTime() - b.data.getTime());
-    let previousComKm: DeltaSourceRecord | null = null;
+    let previous: DeltaSourceRecord | null = null;
     for (const record of sorted) {
-      if (!contaParaMedia(record.combustivel)) {
-        result.set(record.id, { kmAnterior: null, kmRodado: null, media: null });
-        continue;
-      }
-      if (!previousComKm) {
+      const kmAnterior = record.kmAnteriorManual ?? previous?.km ?? null;
+      if (kmAnterior === null) {
         result.set(record.id, { kmAnterior: null, kmRodado: null, media: null });
       } else {
-        const kmRodado = record.km - previousComKm.km;
-        const media = kmRodado > 0 && record.litros > 0 ? kmRodado / record.litros : null;
-        result.set(record.id, { kmAnterior: previousComKm.km, kmRodado, media });
+        const kmRodado = record.km - kmAnterior;
+        const media =
+          contaParaMedia(record.combustivel) && kmRodado > 0 && record.litros > 0
+            ? kmRodado / record.litros
+            : null;
+        result.set(record.id, { kmAnterior, kmRodado, media });
       }
-      previousComKm = record;
+      previous = record;
     }
   }
   return result;

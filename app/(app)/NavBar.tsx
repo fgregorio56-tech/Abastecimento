@@ -33,7 +33,7 @@ export function NavBar({
 
   return (
     <header className="border-b border-brand-100 bg-white">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1800px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
           <div className="leading-tight">
             <span className="text-lg font-extrabold tracking-tight text-slate-900">

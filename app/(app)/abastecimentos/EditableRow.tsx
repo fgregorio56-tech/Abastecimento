@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteFuelRecord, updateFuelRecord } from "./actions";
 import { ERROR_LABELS } from "@/lib/validation";
-import { formatDate, formatKm, formatLitros, formatMedia } from "@/lib/format";
+import { formatDate, formatKm, formatLitros, formatMedia, formatCurrency } from "@/lib/format";
 import { FUEL_TYPES, FUEL_TYPE_LABELS, ORIGENS, ORIGEM_LABELS } from "@/lib/roles";
 
 export interface RowData {
@@ -18,6 +18,8 @@ export interface RowData {
   kmRodado: number | null;
   media: number | null;
   litros: number | null;
+  valorLitro: number | null;
+  valorTotal: number | null;
   combustivel: string;
   origem: string;
   motorista: string | null;
@@ -53,6 +55,7 @@ export function EditableRow({
   const [km, setKm] = useState(row.km?.toString() ?? "");
   const [kmAnterior, setKmAnterior] = useState(row.kmAnteriorManual?.toString() ?? "");
   const [litros, setLitros] = useState(row.litros?.toString() ?? "");
+  const [valorLitro, setValorLitro] = useState(row.valorLitro?.toString() ?? "");
   const [combustivel, setCombustivel] = useState(row.combustivel);
   const [origem, setOrigem] = useState(row.origem);
   const [motorista, setMotorista] = useState(row.motorista ?? "");
@@ -66,6 +69,7 @@ export function EditableRow({
         km,
         kmAnterior,
         litros,
+        valorLitro,
         combustivel,
         origem,
         motorista,
@@ -137,6 +141,21 @@ export function EditableRow({
             inputMode="decimal"
             className="w-20 rounded border border-slate-300 px-2 py-1 text-right text-sm"
           />
+        </td>
+        <td className="py-2 pr-2">
+          <input
+            value={valorLitro}
+            onChange={(e) => setValorLitro(e.target.value)}
+            inputMode="decimal"
+            className="w-20 rounded border border-slate-300 px-2 py-1 text-right text-sm"
+          />
+        </td>
+        <td className="py-2 pr-2 text-right tabular-nums text-slate-500">
+          {formatCurrency(
+            litros && valorLitro && Number.isFinite(Number(litros.replace(",", "."))) && Number.isFinite(Number(valorLitro.replace(",", ".")))
+              ? Number(litros.replace(",", ".")) * Number(valorLitro.replace(",", "."))
+              : null,
+          )}
         </td>
         <td className="py-2 pr-2">
           <select
@@ -220,6 +239,8 @@ export function EditableRow({
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatKm(row.kmRodado)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatMedia(row.media)}</td>
       <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatLitros(row.litros)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatCurrency(row.valorLitro)}</td>
+      <td className="py-2 pr-2 text-right tabular-nums text-slate-600">{formatCurrency(row.valorTotal)}</td>
       <td className="py-2 pr-2 text-slate-500">{FUEL_TYPE_LABELS[row.combustivel as keyof typeof FUEL_TYPE_LABELS] ?? row.combustivel}</td>
       <td className="py-2 pr-2">
         <span

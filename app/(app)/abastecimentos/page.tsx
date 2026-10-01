@@ -7,6 +7,7 @@ import type { RowData } from "./EditableRow";
 import { FuelRecordsTable, type SortLinks } from "./FuelRecordsTable";
 import { SearchBox } from "../SearchBox";
 import { UnitFilter } from "../UnitFilter";
+import { NewRecordForm } from "./NewRecordForm";
 import { getRecordsForKmChain } from "@/lib/data";
 import { computeRecordDeltas } from "@/lib/metrics";
 import type { Prisma } from "@prisma/client";
@@ -146,6 +147,8 @@ export default async function AbastecimentosPage({
         </div>
       </div>
 
+      {canEdit && <NewRecordForm />}
+
       <div className="flex flex-wrap gap-2">
         <SearchBox initialValue={q} placeholder="Buscar por placa ou motorista..." />
         <UnitFilter initialValue={unidade} />
@@ -164,6 +167,8 @@ export default async function AbastecimentosPage({
             kmRodado: delta?.kmRodado ?? null,
             media: delta?.media ?? null,
             litros: r.litros,
+            valorLitro: r.valorLitro,
+            valorTotal: r.valorTotal,
             combustivel: r.combustivel,
             origem: r.origem,
             motorista: r.motorista,

@@ -7,6 +7,7 @@ const PAGE_SIZE = 40;
 
 const TYPE_BADGE: Record<ActivityType, string> = {
   IMPORTACAO: "bg-sky-100 text-sky-700",
+  LANCAMENTO: "bg-indigo-100 text-indigo-700",
   CORRECAO: "bg-amber-100 text-amber-700",
   EXCLUSAO: "bg-red-100 text-red-700",
   VEICULO: "bg-teal-100 text-teal-700",

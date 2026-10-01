@@ -87,6 +87,8 @@ export default async function PendenciasPage({
               kmRodado: delta?.kmRodado ?? null,
               media: delta?.media ?? null,
               litros: r.litros,
+              valorLitro: r.valorLitro,
+              valorTotal: r.valorTotal,
               combustivel: r.combustivel,
               origem: r.origem,
               motorista: r.motorista,

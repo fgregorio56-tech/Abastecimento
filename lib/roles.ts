@@ -79,6 +79,7 @@ export const TIPOS_VEICULO_SUGERIDOS = [
 
 export const ACTIVITY_TYPES = [
   "IMPORTACAO",
+  "LANCAMENTO",
   "CORRECAO",
   "EXCLUSAO",
   "VEICULO",
@@ -90,6 +91,7 @@ export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
 export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
   IMPORTACAO: "Importação",
+  LANCAMENTO: "Lançamento manual",
   CORRECAO: "Correção",
   EXCLUSAO: "Exclusão",
   VEICULO: "Veículo",

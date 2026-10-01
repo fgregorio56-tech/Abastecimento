@@ -19,18 +19,20 @@ export interface SortLinks {
 // fazia o conteúdo ficar escondido atrás da coluna de Ações fixada.
 const COL_WIDTHS = {
   checkbox: 36,
-  placa: 92,
-  data: 108,
-  km: 96,
-  kmAnterior: 108,
-  kmRodado: 100,
-  media: 84,
-  litros: 84,
-  combustivel: 116,
-  origem: 130,
-  motorista: 160,
-  posto: 160,
-  situacao: 220,
+  placa: 88,
+  data: 100,
+  km: 88,
+  kmAnterior: 100,
+  kmRodado: 92,
+  media: 76,
+  litros: 76,
+  valorLitro: 88,
+  valorTotal: 96,
+  combustivel: 108,
+  origem: 118,
+  motorista: 140,
+  posto: 140,
+  situacao: 200,
   acoes: 150,
 };
 
@@ -116,7 +118,7 @@ export function FuelRecordsTable({
     });
   }
 
-  const colSpan = canEdit ? 14 : 12;
+  const colSpan = canEdit ? 16 : 14;
   const tableWidth =
     (canEdit ? COL_WIDTHS.checkbox : 0) +
     COL_WIDTHS.placa +
@@ -126,6 +128,8 @@ export function FuelRecordsTable({
     COL_WIDTHS.kmRodado +
     COL_WIDTHS.media +
     COL_WIDTHS.litros +
+    COL_WIDTHS.valorLitro +
+    COL_WIDTHS.valorTotal +
     COL_WIDTHS.combustivel +
     COL_WIDTHS.origem +
     COL_WIDTHS.motorista +
@@ -165,6 +169,8 @@ export function FuelRecordsTable({
           <col style={{ width: COL_WIDTHS.kmRodado }} />
           <col style={{ width: COL_WIDTHS.media }} />
           <col style={{ width: COL_WIDTHS.litros }} />
+          <col style={{ width: COL_WIDTHS.valorLitro }} />
+          <col style={{ width: COL_WIDTHS.valorTotal }} />
           <col style={{ width: COL_WIDTHS.combustivel }} />
           <col style={{ width: COL_WIDTHS.origem }} />
           <col style={{ width: COL_WIDTHS.situacao }} />
@@ -191,6 +197,8 @@ export function FuelRecordsTable({
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">KM rodado</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Média</th>
             <SortableTh label="Litros" column="litros" href={sortLinks?.litros} currentSort={currentSort} currentDir={currentDir} align="right" />
+            <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Vlr. unit.</th>
+            <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Vlr. total</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Combustível</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Origem</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Situação</th>

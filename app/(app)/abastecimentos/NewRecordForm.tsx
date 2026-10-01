@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createFuelRecord, getPreviousKmPreview } from "./actions";
 import { formatKm } from "@/lib/format";
+import { FUEL_TYPES, FUEL_TYPE_LABELS, ORIGENS, ORIGEM_LABELS, POSTO_INTERNO_LABEL } from "@/lib/roles";
 
 export function NewRecordForm() {
   const router = useRouter();
@@ -16,6 +17,9 @@ export function NewRecordForm() {
   const [km, setKm] = useState("");
   const [litros, setLitros] = useState("");
   const [valorLitro, setValorLitro] = useState("");
+  const [combustivel, setCombustivel] = useState<string>("DIESEL");
+  const [origem, setOrigem] = useState<string>("EXTERNO");
+  const [posto, setPosto] = useState("");
   const [kmAnteriorPreview, setKmAnteriorPreview] = useState<number | null>(null);
   const previewRequestId = useRef(0);
 
@@ -48,13 +52,21 @@ export function NewRecordForm() {
     setKm("");
     setLitros("");
     setValorLitro("");
+    setCombustivel("DIESEL");
+    setOrigem("EXTERNO");
+    setPosto("");
     setKmAnteriorPreview(null);
+  }
+
+  function handleOrigemChange(value: string) {
+    setOrigem(value);
+    setPosto(value === "INTERNO" ? POSTO_INTERNO_LABEL : "");
   }
 
   function save() {
     setError(null);
     startTransition(async () => {
-      const result = await createFuelRecord({ placa, data, km, litros, valorLitro });
+      const result = await createFuelRecord({ placa, data, km, litros, valorLitro, combustivel, origem, posto });
       if (!result.ok) {
         setError(result.error ?? "Erro ao lançar o abastecimento.");
         return;
@@ -92,7 +104,7 @@ export function NewRecordForm() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-9">
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-slate-600">Placa</label>
           <input
@@ -142,6 +154,46 @@ export function NewRecordForm() {
             onChange={(e) => setValorLitro(e.target.value)}
             inputMode="decimal"
             className="rounded border border-slate-300 px-2 py-1.5 text-right text-sm"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-600">Combustível</label>
+          <select
+            value={combustivel}
+            onChange={(e) => setCombustivel(e.target.value)}
+            className="rounded border border-slate-300 px-2 py-1.5 text-sm"
+          >
+            {FUEL_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {FUEL_TYPE_LABELS[t]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-600">Origem</label>
+          <select
+            value={origem}
+            onChange={(e) => handleOrigemChange(e.target.value)}
+            className="rounded border border-slate-300 px-2 py-1.5 text-sm"
+          >
+            {ORIGENS.map((o) => (
+              <option key={o} value={o}>
+                {ORIGEM_LABELS[o]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-600">Posto</label>
+          <input
+            value={posto}
+            onChange={(e) => setPosto(e.target.value)}
+            disabled={origem === "INTERNO"}
+            placeholder={origem === "INTERNO" ? "" : "Nome do posto"}
+            className={`rounded border px-2 py-1.5 text-sm ${
+              origem === "INTERNO" ? "border-slate-200 bg-slate-100 text-slate-500" : "border-slate-300"
+            }`}
           />
         </div>
       </div>

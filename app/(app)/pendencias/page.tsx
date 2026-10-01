@@ -91,6 +91,7 @@ export default async function PendenciasPage({
               valorTotal: r.valorTotal,
               combustivel: r.combustivel,
               origem: r.origem,
+              manual: r.importBatchId === null,
               motorista: r.motorista,
               posto: r.posto,
               hasError: r.hasError,

@@ -53,6 +53,9 @@ export const ORIGEM_LABELS: Record<Origem, string> = {
   INTERNO: "Interno (frota)",
 };
 
+/** Nome padrão do posto para abastecimentos de origem interna (frota própria). */
+export const POSTO_INTERNO_LABEL = "Posto Interno RETEC";
+
 /** Unidades/filiais da frota (lista fechada). */
 export const UNIDADES = [
   "RETEC SIMOES FILHO",

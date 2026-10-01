@@ -30,6 +30,7 @@ const COL_WIDTHS = {
   valorTotal: 96,
   combustivel: 108,
   origem: 118,
+  lancamento: 104,
   motorista: 140,
   posto: 140,
   situacao: 200,
@@ -118,7 +119,7 @@ export function FuelRecordsTable({
     });
   }
 
-  const colSpan = canEdit ? 16 : 14;
+  const colSpan = canEdit ? 17 : 15;
   const tableWidth =
     (canEdit ? COL_WIDTHS.checkbox : 0) +
     COL_WIDTHS.placa +
@@ -132,6 +133,7 @@ export function FuelRecordsTable({
     COL_WIDTHS.valorTotal +
     COL_WIDTHS.combustivel +
     COL_WIDTHS.origem +
+    COL_WIDTHS.lancamento +
     COL_WIDTHS.motorista +
     COL_WIDTHS.posto +
     COL_WIDTHS.situacao +
@@ -173,6 +175,7 @@ export function FuelRecordsTable({
           <col style={{ width: COL_WIDTHS.valorTotal }} />
           <col style={{ width: COL_WIDTHS.combustivel }} />
           <col style={{ width: COL_WIDTHS.origem }} />
+          <col style={{ width: COL_WIDTHS.lancamento }} />
           <col style={{ width: COL_WIDTHS.situacao }} />
           <col style={{ width: COL_WIDTHS.motorista }} />
           <col style={{ width: COL_WIDTHS.posto }} />
@@ -201,6 +204,7 @@ export function FuelRecordsTable({
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2 text-right">Vlr. total</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Combustível</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Origem</th>
+            <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Lançamento</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Situação</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Motorista</th>
             <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Posto</th>

@@ -22,6 +22,8 @@ export interface RowData {
   valorTotal: number | null;
   combustivel: string;
   origem: string;
+  /** true = lançamento manual; false = veio de uma importação de planilha. */
+  manual: boolean;
   motorista: string | null;
   posto: string | null;
   hasError: boolean;
@@ -183,6 +185,15 @@ export function EditableRow({
             ))}
           </select>
         </td>
+        <td className="py-2 pr-2">
+          <span
+            className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
+              row.manual ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            {row.manual ? "Manual" : "Importado"}
+          </span>
+        </td>
         <td className="py-2 pr-2 text-xs text-red-600">
           {error}
         </td>
@@ -249,6 +260,15 @@ export function EditableRow({
           }`}
         >
           {ORIGEM_LABELS[row.origem as keyof typeof ORIGEM_LABELS] ?? row.origem}
+        </span>
+      </td>
+      <td className="py-2 pr-2">
+        <span
+          className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
+            row.manual ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {row.manual ? "Manual" : "Importado"}
         </span>
       </td>
       <td className="py-2 pr-2">

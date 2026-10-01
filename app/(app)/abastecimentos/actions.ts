@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/session";
 import { normalizePlaca, isPlacaValida } from "@/lib/placa";
 import { revalidateVehicleRecords, revalidateUnlinkedRecords } from "@/lib/revalidate";
 import { logActivity } from "@/lib/activityLog";
-import { FUEL_TYPES, ORIGENS, contaParaMedia } from "@/lib/roles";
+import { FUEL_TYPES, ORIGENS, contaParaMedia, POSTO_INTERNO_LABEL } from "@/lib/roles";
 
 export interface UpdateResult {
   ok: boolean;
@@ -162,6 +162,9 @@ export async function createFuelRecord(input: {
   km: string;
   litros: string;
   valorLitro: string;
+  combustivel?: string;
+  origem?: string;
+  posto?: string;
 }): Promise<UpdateResult> {
   const user = await requireRole("MASTER", "EDITOR");
 
@@ -179,6 +182,16 @@ export async function createFuelRecord(input: {
       ? Number((valorLitro * litros).toFixed(2))
       : null;
 
+  const combustivel =
+    input.combustivel && FUEL_TYPES.includes(input.combustivel as (typeof FUEL_TYPES)[number])
+      ? input.combustivel
+      : "DIESEL";
+  const origem =
+    input.origem && ORIGENS.includes(input.origem as (typeof ORIGENS)[number]) ? input.origem : "EXTERNO";
+  // Origem interna sempre usa o posto padrão da frota — não confia no valor
+  // vindo do cliente pra esse caso, ainda que o campo esteja desabilitado lá.
+  const posto = origem === "INTERNO" ? POSTO_INTERNO_LABEL : input.posto?.trim() || null;
+
   let vehicleId: string | null = null;
   if (isPlacaValida(placaTexto)) {
     const vehicle = await prisma.vehicle.upsert({
@@ -187,6 +200,24 @@ export async function createFuelRecord(input: {
       create: { placa: placaTexto, createdById: user.id },
     });
     vehicleId = vehicle.id;
+  }
+
+  // Lançamento manual substitui o(s) registro(s) importado(s) do mesmo
+  // veículo/dia/combustível, pra não ficar duplicado no relatório — o
+  // lançamento manual é tratado como a versão corrigida/oficial.
+  let substituidos = 0;
+  if (vehicleId) {
+    const [ano, mes, dia] = input.data.split("-").map(Number);
+    const inicioDia = new Date(Date.UTC(ano, mes - 1, dia));
+    const fimDia = new Date(Date.UTC(ano, mes - 1, dia + 1));
+    const duplicadosImportados = await prisma.fuelRecord.findMany({
+      where: { vehicleId, combustivel, importBatchId: { not: null }, data: { gte: inicioDia, lt: fimDia } },
+      select: { id: true },
+    });
+    if (duplicadosImportados.length > 0) {
+      await prisma.fuelRecord.deleteMany({ where: { id: { in: duplicadosImportados.map((d) => d.id) } } });
+      substituidos = duplicadosImportados.length;
+    }
   }
 
   await prisma.fuelRecord.create({
@@ -198,8 +229,9 @@ export async function createFuelRecord(input: {
       litros: litros !== null && Number.isFinite(litros) ? litros : null,
       valorLitro: valorLitro !== null && Number.isFinite(valorLitro) ? valorLitro : null,
       valorTotal,
-      combustivel: "DIESEL",
-      origem: "EXTERNO",
+      combustivel,
+      origem,
+      posto,
       createdById: user.id,
     },
   });
@@ -210,7 +242,13 @@ export async function createFuelRecord(input: {
     await revalidateUnlinkedRecords();
   }
 
-  await logActivity("LANCAMENTO", `Lançou abastecimento manual de ${placaTexto}`, user.id);
+  await logActivity(
+    "LANCAMENTO",
+    substituidos > 0
+      ? `Lançou abastecimento manual de ${placaTexto} (substituiu ${substituidos} registro(s) importado(s) duplicado(s) no mesmo dia)`
+      : `Lançou abastecimento manual de ${placaTexto}`,
+    user.id,
+  );
 
   revalidateAbastecimentoPaths();
 

@@ -208,9 +208,12 @@ export default async function DashboardPage({
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-brand-100 bg-white p-4">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">🔻 Piores desempenhos</h3>
-          <p className="mb-2 text-xs text-slate-400">meta e média real em km/l, comparadas ao histórico do próprio veículo</p>
+        <div className="rounded-2xl border border-brand-100 bg-white p-5 shadow-sm">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-sm text-red-600">▼</span>
+            <h3 className="text-sm font-semibold text-slate-900">Piores desempenhos</h3>
+          </div>
+          <p className="mb-3 text-xs text-slate-400">meta e média real em km/l, comparadas ao histórico do próprio veículo</p>
           {piores.length === 0 ? (
             <p className="text-sm text-slate-500">Dados insuficientes no período.</p>
           ) : (
@@ -221,9 +224,12 @@ export default async function DashboardPage({
             </div>
           )}
         </div>
-        <div className="rounded-xl border border-brand-100 bg-white p-4">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">🏆 Melhores desempenhos</h3>
-          <p className="mb-2 text-xs text-slate-400">acima da própria meta histórica</p>
+        <div className="rounded-2xl border border-brand-100 bg-white p-5 shadow-sm">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-sm text-amber-600">🏆</span>
+            <h3 className="text-sm font-semibold text-slate-900">Melhores desempenhos</h3>
+          </div>
+          <p className="mb-3 text-xs text-slate-400">acima da própria meta histórica</p>
           {melhores.length === 0 ? (
             <p className="text-sm text-slate-500">Dados insuficientes no período.</p>
           ) : (

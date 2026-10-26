@@ -1,4 +1,5 @@
 import { formatMedia } from "@/lib/format";
+import { LicensePlate } from "./LicensePlate";
 
 export function PerformanceCard({
   placa,
@@ -14,13 +15,18 @@ export function PerformanceCard({
   diferenca: number | null;
 }) {
   const good = diferenca !== null && diferenca >= 0;
-  const tone = diferenca === null ? "text-slate-400" : good ? "text-[#0ca30c]" : "text-[#d03b3b]";
+  const badgeTone =
+    diferenca === null
+      ? "bg-slate-100 text-slate-500"
+      : good
+        ? "bg-emerald-50 text-emerald-700"
+        : "bg-red-50 text-red-600";
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
-      <div>
-        <p className="text-sm font-bold text-slate-900">{placa}</p>
-        <p className="text-xs uppercase tracking-wide text-slate-500">{marca ?? "—"}</p>
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-3 py-2.5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-center gap-3">
+        <LicensePlate placa={placa} />
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{marca ?? "—"}</p>
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right">
@@ -31,9 +37,9 @@ export function PerformanceCard({
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Real</p>
           <p className="text-sm font-medium text-slate-900">{formatMedia(real)}</p>
         </div>
-        <p className={`w-16 text-right text-sm font-bold ${tone}`}>
+        <span className={`inline-flex w-16 items-center justify-center rounded-full px-2 py-1 text-xs font-bold ${badgeTone}`}>
           {diferenca === null ? "—" : `${diferenca > 0 ? "+" : ""}${diferenca}%`}
-        </p>
+        </span>
       </div>
     </div>
   );

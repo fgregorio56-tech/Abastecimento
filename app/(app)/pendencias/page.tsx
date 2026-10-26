@@ -40,12 +40,20 @@ export default async function PendenciasPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Pendências</h1>
-        <p className="text-sm text-slate-500">
-          Abastecimentos com erro de validação e veículos sem cadastro completo — tudo que precisa de
-          atenção antes de entrar nos relatórios e na exportação.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Pendências</h1>
+          <p className="text-sm text-slate-500">
+            Abastecimentos com erro de validação e veículos sem cadastro completo — tudo que precisa de
+            atenção antes de entrar nos relatórios e na exportação.
+          </p>
+        </div>
+        <a
+          href={`/api/export?status=pendentes${unidade ? `&unidade=${encodeURIComponent(unidade)}` : ""}`}
+          className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+        >
+          ⬇ Baixar pendências (.xlsx)
+        </a>
       </div>
 
       <UnitFilter initialValue={unidade} />

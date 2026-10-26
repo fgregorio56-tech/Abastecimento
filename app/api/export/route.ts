@@ -13,10 +13,15 @@ export async function GET(request: NextRequest) {
   const months = request.nextUrl.searchParams.getAll("mes");
   const somenteCorrigidos = request.nextUrl.searchParams.get("somenteCorrigidos") === "1";
   const unidade = request.nextUrl.searchParams.get("unidade");
+  const statusParam = request.nextUrl.searchParams.get("status");
+  const status = statusParam === "pendentes" || statusParam === "todos" ? statusParam : "validos";
 
-  const where: NonNullable<Parameters<typeof prisma.fuelRecord.findMany>[0]>["where"] = {
-    hasError: false,
-  };
+  const where: NonNullable<Parameters<typeof prisma.fuelRecord.findMany>[0]>["where"] = {};
+  if (status === "pendentes") {
+    where.hasError = true;
+  } else if (status === "validos") {
+    where.hasError = false;
+  }
   if (somenteCorrigidos) where.corrected = true;
   if (unidade) where.vehicle = { unidade };
   if (months.length > 0) {
@@ -46,10 +51,11 @@ export async function GET(request: NextRequest) {
       motorista: r.motorista,
       corrected: r.corrected,
       hasError: r.hasError,
+      errors: r.hasError ? (JSON.parse(r.errors) as string[]) : [],
     })),
   );
 
-  const fileName = `abastecimentos_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  const fileName = `abastecimentos_${status}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {

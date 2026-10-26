@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { FUEL_TYPE_LABELS, type FuelType } from "@/lib/roles";
+import { ERROR_LABELS } from "@/lib/validation";
 
 export interface ExportRow {
   placa: string;
@@ -13,6 +14,7 @@ export interface ExportRow {
   motorista: string | null;
   corrected: boolean;
   hasError: boolean;
+  errors: string[];
 }
 
 export function buildExportWorkbook(rows: ExportRow[]): Buffer {
@@ -28,6 +30,7 @@ export function buildExportWorkbook(rows: ExportRow[]): Buffer {
     Motorista: r.motorista ?? "",
     Corrigido: r.corrected ? "Sim" : "Não",
     "Com erro": r.hasError ? "Sim" : "Não",
+    Pendências: r.errors.map((code) => ERROR_LABELS[code] ?? code).join("; "),
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(sheetData);
@@ -43,6 +46,7 @@ export function buildExportWorkbook(rows: ExportRow[]): Buffer {
     { wch: 16 },
     { wch: 10 },
     { wch: 10 },
+    { wch: 40 },
   ];
 
   const workbook = XLSX.utils.book_new();

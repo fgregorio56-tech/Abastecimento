@@ -44,13 +44,14 @@ interface Props {
   pessoas: { id: string; nome: string }[];
   podeRegistrar: boolean;
   podeGerenciar: boolean;
+  podeExcluir: boolean;
 }
 
 const porHora = (a: RotinaDia, b: RotinaDia) =>
   (a.horario ?? "99").localeCompare(b.horario ?? "99") || a.titulo.localeCompare(b.titulo, "pt-BR");
 
 export function DayView(props: Props) {
-  const { dia, hoje, meuId, rotinas, registros, extras, pessoas, podeRegistrar, podeGerenciar } = props;
+  const { dia, hoje, meuId, rotinas, registros, extras, pessoas, podeRegistrar, podeGerenciar, podeExcluir } = props;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [busy, setBusy] = useState<string | null>(null);
@@ -384,7 +385,7 @@ export function DayView(props: Props) {
                   </p>
                   {x.por && <p className="text-xs text-slate-400">Registrado por {x.por}</p>}
                 </div>
-                {podeGerenciar && (
+                {podeExcluir && (
                   <div className="flex gap-2">
                     {confirmarExtra === x.id ? (
                       <>

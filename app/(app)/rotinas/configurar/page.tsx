@@ -41,7 +41,7 @@ export default async function ConfigurarRotinasPage() {
             " Você vê e configura as suas rotinas e as da sua equipe (pessoas que têm você como supervisor)."}
         </p>
       </div>
-      <RotinasConfig rotinas={dados} pessoas={pessoas} />
+      <RotinasConfig rotinas={dados} pessoas={pessoas} podeExcluir={escopo.podeExcluir} />
     </div>
   );
 }

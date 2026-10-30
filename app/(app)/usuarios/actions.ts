@@ -7,7 +7,7 @@ import { requireRole } from "@/lib/session";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
 import {
   LEVELS,
-  LEVEL_LABELS,
+  levelLabel,
   MODULES,
   MODULE_LABELS,
   parseModulos,
@@ -41,7 +41,7 @@ function buildModulos(input: Partial<Record<ModuleKey, string | null | undefined
 
 function describeAccess(role: Role, modulos: ModuleAccess) {
   if (role === "MASTER") return ROLE_LABELS.MASTER;
-  const parts = MODULES.filter((m) => modulos[m]).map((m) => `${MODULE_LABELS[m]}: ${LEVEL_LABELS[modulos[m]!]}`);
+  const parts = MODULES.filter((m) => modulos[m]).map((m) => `${MODULE_LABELS[m]}: ${levelLabel(m, modulos[m]!)}`);
   return parts.length ? parts.join(" · ") : "sem módulos";
 }
 

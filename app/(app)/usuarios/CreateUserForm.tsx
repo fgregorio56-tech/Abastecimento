@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { createUser, type CreateUserState } from "./actions";
 import { ROLE_LABELS } from "@/lib/roles";
-import { LEVELS, LEVEL_LABELS, MODULES, MODULE_LABELS } from "@/lib/permissions";
+import { LEVELS, levelLabel, MODULES, MODULE_LABELS } from "@/lib/permissions";
 import type { SupervisorOption } from "./UserRow";
 
 const initialState: CreateUserState = { ok: true };
@@ -68,7 +68,7 @@ export function CreateUserForm({ supervisores }: { supervisores: SupervisorOptio
                 <option value="">Sem acesso</option>
                 {LEVELS.map((l) => (
                   <option key={l} value={l}>
-                    {LEVEL_LABELS[l]}
+                    {levelLabel(m, l)}
                   </option>
                 ))}
               </select>

@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
 import {
-  LEVEL_LABELS,
+  levelLabel as rotuloNivel,
+  type Level,
   MODULE_HOME,
   MODULE_LABELS,
   type EffectiveLevel,
@@ -83,7 +84,7 @@ export function NavBar({
   const levelLabel = isAdmin
     ? ROLE_LABELS.MASTER
     : active && levels[active] && levels[active] !== "ADMIN"
-      ? `${MODULE_LABELS[active]}: ${LEVEL_LABELS[levels[active] as keyof typeof LEVEL_LABELS]}`
+      ? `${MODULE_LABELS[active]}: ${rotuloNivel(active, levels[active] as Level)}`
       : ROLE_LABELS[user.role];
 
   function isActive(link: NavLink) {

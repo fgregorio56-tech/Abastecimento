@@ -30,8 +30,9 @@ export default async function UsuariosPage() {
         <p className="max-w-3xl text-sm text-slate-500">
           O <strong>Administrador</strong> acessa tudo. Para os demais, marque em cada módulo o que a pessoa pode
           fazer: <strong>Visualizar</strong> (só consulta), <strong>Incluir e editar</strong> ou{" "}
-          <strong>Supervisor</strong> (também exclui). Quem não tem um módulo liberado não vê nada dele. No Check de
-          rotina, o Supervisor também responde pela equipe: as pessoas que tiverem ele como supervisor.
+          <strong>Supervisor</strong>. No Abastecimento, o Supervisor também exclui. No Check de rotina, ele responde
+          pela equipe (as pessoas que tiverem ele como supervisor), mas não exclui: lá só o Administrador exclui, e o
+          Supervisor pode pausar as rotinas. Quem não tem um módulo liberado não vê nada dele.
         </p>
       </div>
 

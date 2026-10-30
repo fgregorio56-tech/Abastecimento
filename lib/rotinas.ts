@@ -15,20 +15,22 @@ export interface EscopoRotina {
   ids: string[] | null;
   /** Pode marcar, desfazer e incluir extras para as pessoas do escopo. */
   podeRegistrar: boolean;
-  /** Pode excluir extras e configurar rotinas das pessoas do escopo. */
+  /** Pode configurar (cadastrar, editar, pausar) rotinas das pessoas do escopo. */
   podeGerenciar: boolean;
+  /** Pode excluir rotinas e extras. No Check de rotina, só o Administrador. */
+  podeExcluir: boolean;
 }
 
 export async function escopoRotina(user: CurrentUser): Promise<EscopoRotina | null> {
   const nivel = levelOf(user, "ROTINA");
   if (!nivel) return null;
 
-  if (nivel === "ADMIN") return { nivel, ids: null, podeRegistrar: true, podeGerenciar: true };
-  if (nivel === "VIEWER") return { nivel, ids: null, podeRegistrar: false, podeGerenciar: false };
-  if (nivel === "EDITOR") return { nivel, ids: [user.id], podeRegistrar: true, podeGerenciar: false };
+  if (nivel === "ADMIN") return { nivel, ids: null, podeRegistrar: true, podeGerenciar: true, podeExcluir: true };
+  if (nivel === "VIEWER") return { nivel, ids: null, podeRegistrar: false, podeGerenciar: false, podeExcluir: false };
+  if (nivel === "EDITOR") return { nivel, ids: [user.id], podeRegistrar: true, podeGerenciar: false, podeExcluir: false };
 
   const equipe = await prisma.user.findMany({ where: { supervisorId: user.id }, select: { id: true } });
-  return { nivel, ids: [user.id, ...equipe.map((u) => u.id)], podeRegistrar: true, podeGerenciar: true };
+  return { nivel, ids: [user.id, ...equipe.map((u) => u.id)], podeRegistrar: true, podeGerenciar: true, podeExcluir: false };
 }
 
 export function noEscopo(escopo: EscopoRotina, userId: string): boolean {

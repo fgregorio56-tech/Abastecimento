@@ -9,7 +9,7 @@ consumo, ranking de veículos e metas de média por veículo.
 - **Usuários e acessos por módulo**: o **Administrador** acessa tudo e
   gerencia os usuários. Para os demais, cada módulo (Abastecimento, Check de
   rotina) é liberado com um nível: **Visualizar**, **Incluir e editar** ou
-  **Supervisor** (também exclui). Quem não tem o módulo liberado não vê nada
+  **Supervisor** (no Abastecimento, também exclui; no Check de rotina, só o Administrador exclui). Quem não tem o módulo liberado não vê nada
   dele. O login pode ser um e-mail ou um nome de usuário.
 - **Check de rotina**: cada pessoa marca as rotinas programadas do dia como
   feitas ou não feitas (com motivo e justificativa), inclui atividades extras

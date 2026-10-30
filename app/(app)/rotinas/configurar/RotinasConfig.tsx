@@ -48,7 +48,16 @@ const ATALHOS: [string, number[]][] = [
 const input = "rounded-lg border border-slate-300 px-3 py-2 text-sm";
 const label = "text-xs font-medium text-slate-600";
 
-export function RotinasConfig({ rotinas, pessoas }: { rotinas: RotinaConfig[]; pessoas: { id: string; nome: string }[] }) {
+export function RotinasConfig({
+  rotinas,
+  pessoas,
+  podeExcluir,
+}: {
+  rotinas: RotinaConfig[];
+  pessoas: { id: string; nome: string }[];
+  /** No Check de rotina, só o Administrador exclui. */
+  podeExcluir: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState<Form>({ ...VAZIO, responsavelId: pessoas.length === 1 ? pessoas[0].id : "" });
@@ -298,13 +307,15 @@ export function RotinasConfig({ rotinas, pessoas }: { rotinas: RotinaConfig[]; p
                           >
                             {r.ativo ? "Pausar" : "Reativar"}
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setConfirmar(r.id)}
-                            className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                          >
-                            Excluir
-                          </button>
+                          {podeExcluir && (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmar(r.id)}
+                              className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                            >
+                              Excluir
+                            </button>
+                          )}
                         </>
                       )}
                     </div>

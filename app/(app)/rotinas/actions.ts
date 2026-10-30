@@ -129,7 +129,7 @@ export async function adicionarExtra(input: {
 export async function excluirExtra(id: string): Promise<RotinaResult> {
   const user = await requireModule("ROTINA", "SUPERVISOR");
   const escopo = await escopoRotina(user);
-  if (!escopo?.podeGerenciar) return { ok: false, error: "Só supervisores e administradores excluem." };
+  if (!escopo?.podeExcluir) return { ok: false, error: "No Check de rotina, só o Administrador exclui." };
 
   const extra = await prisma.rotinaExtra.findUnique({ where: { id }, select: { responsavelId: true, descricao: true } });
   if (!extra) return { ok: true };
@@ -223,7 +223,7 @@ export async function alternarRotina(id: string, ativo: boolean): Promise<Rotina
 export async function excluirRotina(id: string): Promise<RotinaResult> {
   const user = await requireModule("ROTINA", "SUPERVISOR");
   const escopo = await escopoRotina(user);
-  if (!escopo?.podeGerenciar) return { ok: false, error: "Sem permissão." };
+  if (!escopo?.podeExcluir) return { ok: false, error: "No Check de rotina, só o Administrador exclui. Use Pausar." };
 
   const r = await prisma.rotina.findUnique({ where: { id }, select: { responsavelId: true, titulo: true } });
   if (!r) return { ok: true };

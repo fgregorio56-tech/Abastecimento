@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 import { DIAS_SEMANA, descreverFrequencia } from "@/lib/rotinas-shared";
-import { alternarRotina, excluirRotina, salvarRotina } from "../actions";
+import { alternarRotina, excluirRotina, salvarRotina, transferirRotina } from "../actions";
 
 export interface RotinaConfig {
   id: string;
@@ -55,7 +55,7 @@ export function RotinasConfig({
 }: {
   rotinas: RotinaConfig[];
   pessoas: { id: string; nome: string }[];
-  /** No Check de rotina, só o Administrador exclui. */
+  /** Gestor da equipe e Administrador excluem. */
   podeExcluir: boolean;
 }) {
   const router = useRouter();
@@ -64,6 +64,7 @@ export function RotinasConfig({
   const [erro, setErro] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [confirmar, setConfirmar] = useState<string | null>(null);
+  const [transferir, setTransferir] = useState<{ id: string; para: string } | null>(null);
 
   function set<K extends keyof Form>(k: K, v: Form[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -272,7 +273,46 @@ export function RotinasConfig({
                     )}
                     {r.local && <p className="text-xs text-slate-500">{r.local}</p>}
                   </td>
-                  <td className="px-3 py-2">{r.responsavel}</td>
+                  <td className="px-3 py-2">
+                    {transferir?.id === r.id ? (
+                      <div className="flex flex-col gap-1">
+                        <select
+                          aria-label={`Novo responsável por ${r.titulo}`}
+                          value={transferir.para}
+                          onChange={(e) => setTransferir({ id: r.id, para: e.target.value })}
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs"
+                        >
+                          <option value="">Transferir para...</option>
+                          {pessoas
+                            .filter((p) => p.id !== r.responsavelId)
+                            .map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.nome}
+                              </option>
+                            ))}
+                        </select>
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            disabled={!transferir.para || isPending}
+                            onClick={() => {
+                              const para = transferir.para;
+                              setTransferir(null);
+                              run(() => transferirRotina(r.id, para), "Rotina transferida.");
+                            }}
+                            className="rounded-lg border border-brand-200 px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-50"
+                          >
+                            Confirmar
+                          </button>
+                          <button type="button" onClick={() => setTransferir(null)} className="px-2 py-1 text-xs text-slate-500">
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      r.responsavel
+                    )}
+                  </td>
                   <td className="px-3 py-2">{descreverFrequencia(r)}</td>
                   <td className="px-3 py-2 tabular-nums">{r.horario ?? "—"}</td>
                   <td className="px-3 py-2">
@@ -307,6 +347,18 @@ export function RotinasConfig({
                           >
                             {r.ativo ? "Pausar" : "Reativar"}
                           </button>
+                          {pessoas.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmar(null);
+                                setTransferir({ id: r.id, para: "" });
+                              }}
+                              className="rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                            >
+                              Transferir
+                            </button>
+                          )}
                           {podeExcluir && (
                             <button
                               type="button"

@@ -6,7 +6,7 @@ import { isAdmin, levelOf, parseModulos, type EffectiveLevel } from "@/lib/permi
  * Quem cada nível enxerga no Check de rotina:
  *   Administrador → todo mundo
  *   Visualizar    → todo mundo, só leitura
- *   Supervisor    → ele e a equipe dele (quem tem ele como supervisor)
+ *   Gestor        → ele e a equipe dele (quem tem ele como gestor)
  *   Incluir/editar→ só ele
  */
 export interface EscopoRotina {
@@ -17,7 +17,7 @@ export interface EscopoRotina {
   podeRegistrar: boolean;
   /** Pode configurar (cadastrar, editar, pausar) rotinas das pessoas do escopo. */
   podeGerenciar: boolean;
-  /** Pode excluir rotinas e extras. No Check de rotina, só o Administrador. */
+  /** Pode excluir rotinas e extras das pessoas do escopo (Gestor e Administrador). */
   podeExcluir: boolean;
 }
 
@@ -30,7 +30,7 @@ export async function escopoRotina(user: CurrentUser): Promise<EscopoRotina | nu
   if (nivel === "EDITOR") return { nivel, ids: [user.id], podeRegistrar: true, podeGerenciar: false, podeExcluir: false };
 
   const equipe = await prisma.user.findMany({ where: { supervisorId: user.id }, select: { id: true } });
-  return { nivel, ids: [user.id, ...equipe.map((u) => u.id)], podeRegistrar: true, podeGerenciar: true, podeExcluir: false };
+  return { nivel, ids: [user.id, ...equipe.map((u) => u.id)], podeRegistrar: true, podeGerenciar: true, podeExcluir: true };
 }
 
 export function noEscopo(escopo: EscopoRotina, userId: string): boolean {

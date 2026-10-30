@@ -76,7 +76,7 @@ export function CreateUserForm({ supervisores }: { supervisores: SupervisorOptio
           ))}
           {rotina && (
             <div className="flex flex-col gap-1">
-              <label htmlFor="nu-sup" className="text-xs font-medium text-slate-600">Supervisor (rotina)</label>
+              <label htmlFor="nu-sup" className="text-xs font-medium text-slate-600">Gestor (rotina)</label>
               <select id="nu-sup" name="supervisorId" defaultValue="" className={`w-48 ${inputCls}`}>
                 <option value="">Nenhum</option>
                 {supervisores.map((s) => (

@@ -119,7 +119,7 @@ export default async function ResumoRotinasPage({
           <h1 className="text-2xl font-bold text-slate-900">Resumo das rotinas</h1>
           <p className="text-sm text-slate-500">
             {formatarDiaCurto(inicio)} a {formatarDiaCurto(fim)}
-            {escopo.ids !== null && (escopo.nivel === "SUPERVISOR" ? " · você e sua equipe" : " · suas rotinas")}
+            {escopo.ids !== null && (escopo.nivel === "SUPERVISOR" ? " · você e sua equipe (gestor)" : " · suas rotinas")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">

@@ -7,9 +7,11 @@
  *   um com o seu nível:
  *     VIEWER     → Visualizar
  *     EDITOR     → Incluir e editar
- *     SUPERVISOR → No Abastecimento, também exclui. No Check de rotina,
- *                  responde pela equipe que tem ele como supervisor, mas não
- *                  exclui: lá só o Administrador exclui.
+ *     SUPERVISOR → No Abastecimento: Supervisor, também exclui.
+ *                  No Check de rotina: "Gestor da equipe". Responde pela
+ *                  equipe que tem ele como gestor: vê o resumo, marca,
+ *                  configura, transfere e exclui rotinas da equipe. Não é
+ *                  Administrador: não vê outras equipes nem gerencia usuários.
  *
  * Este arquivo não importa nada do servidor, então pode ser usado tanto em
  * componentes de servidor quanto de cliente.
@@ -38,9 +40,9 @@ export const LEVEL_LABELS: Record<Level, string> = {
   SUPERVISOR: "Supervisor (também exclui)",
 };
 
-/** Rótulo do nível dentro de um módulo (o Supervisor só exclui no Abastecimento). */
+/** Rótulo do nível dentro de um módulo (no Check de rotina o Supervisor é o Gestor da equipe). */
 export function levelLabel(m: ModuleKey, l: Level): string {
-  if (l === "SUPERVISOR" && m === "ROTINA") return "Supervisor (equipe)";
+  if (l === "SUPERVISOR" && m === "ROTINA") return "Gestor da equipe";
   return LEVEL_LABELS[l];
 }
 

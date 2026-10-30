@@ -38,7 +38,7 @@ export default async function ConfigurarRotinasPage() {
         <p className="max-w-3xl text-sm text-slate-500">
           Cada rotina aparece no Check do dia do responsável conforme a frequência, a partir da data de cadastro.
           {escopo.ids !== null &&
-            " Você vê e configura as suas rotinas e as da sua equipe (pessoas que têm você como supervisor)."}
+            " Como gestor, você vê e configura as suas rotinas e as da sua equipe (pessoas que têm você como gestor): pode editar, pausar, transferir para outra pessoa da equipe ou excluir."}
         </p>
       </div>
       <RotinasConfig rotinas={dados} pessoas={pessoas} podeExcluir={escopo.podeExcluir} />

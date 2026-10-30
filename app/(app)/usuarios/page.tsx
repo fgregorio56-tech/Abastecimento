@@ -30,9 +30,11 @@ export default async function UsuariosPage() {
         <p className="max-w-3xl text-sm text-slate-500">
           O <strong>Administrador</strong> acessa tudo. Para os demais, marque em cada módulo o que a pessoa pode
           fazer: <strong>Visualizar</strong> (só consulta), <strong>Incluir e editar</strong> ou{" "}
-          <strong>Supervisor</strong>. No Abastecimento, o Supervisor também exclui. No Check de rotina, ele responde
-          pela equipe (as pessoas que tiverem ele como supervisor), mas não exclui: lá só o Administrador exclui, e o
-          Supervisor pode pausar as rotinas. Quem não tem um módulo liberado não vê nada dele.
+          <strong>Supervisor</strong> (no Abastecimento, também exclui). No Check de rotina, o nível mais alto é{" "}
+          <strong>Gestor da equipe</strong>: a pessoa não vira Administrador, mas responde pela equipe dela (quem tiver
+          ela na coluna Gestor): vê o resumo da equipe, marca e justifica, configura, transfere e exclui rotinas da
+          equipe. Para alguém aparecer como opção na coluna Gestor, dê a ela o nível Gestor da equipe no Check de rotina.
+          Quem não tem um módulo liberado não vê nada dele.
         </p>
       </div>
 
@@ -50,7 +52,7 @@ export default async function UsuariosPage() {
               <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Perfil</th>
               <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Abastecimento</th>
               <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Check de rotina</th>
-              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Supervisor (rotina)</th>
+              <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Gestor (rotina)</th>
               <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Situação</th>
               <th className="sticky top-0 z-10 whitespace-nowrap bg-slate-50 px-3 py-2">Ações</th>
             </tr>

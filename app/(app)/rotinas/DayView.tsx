@@ -44,6 +44,7 @@ interface Props {
   pessoas: { id: string; nome: string }[];
   podeRegistrar: boolean;
   podeGerenciar: boolean;
+  podeIncluir: boolean;
   podeExcluir: boolean;
 }
 
@@ -51,7 +52,7 @@ const porHora = (a: RotinaDia, b: RotinaDia) =>
   (a.horario ?? "99").localeCompare(b.horario ?? "99") || a.titulo.localeCompare(b.titulo, "pt-BR");
 
 export function DayView(props: Props) {
-  const { dia, hoje, meuId, rotinas, registros, extras, pessoas, podeRegistrar, podeGerenciar, podeExcluir } = props;
+  const { dia, hoje, meuId, rotinas, registros, extras, pessoas, podeRegistrar, podeGerenciar, podeIncluir, podeExcluir } = props;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [busy, setBusy] = useState<string | null>(null);
@@ -207,7 +208,9 @@ export function DayView(props: Props) {
       {rotinas.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
           Nenhuma rotina programada para este dia.
-          {podeGerenciar && " Cadastre as rotinas da equipe em Configurar rotinas."}
+          {podeGerenciar
+            ? " Cadastre as rotinas da equipe em Configurar rotinas."
+            : podeIncluir && " Cadastre as suas rotinas em Configurar rotinas."}
         </div>
       ) : (
         grupos.map((g) => {
@@ -464,9 +467,9 @@ function ExtraForm({
           setObservacao("");
         });
       }}
-      className="flex flex-col gap-3 rounded-xl border border-brand-100 bg-white p-4 md:flex-row md:items-end"
+      className="grid grid-cols-1 gap-3 rounded-xl border border-brand-100 bg-white p-4 md:grid-cols-12 md:items-end"
     >
-      <div className="flex min-w-0 flex-[2] flex-col gap-1">
+      <div className={`flex flex-col gap-1 ${equipe ? "md:col-span-4" : "md:col-span-5"}`}>
         <label htmlFor="ex-desc" className="text-xs font-medium text-slate-600">O que foi feito</label>
         <input
           id="ex-desc"
@@ -474,17 +477,17 @@ function ExtraForm({
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
           placeholder="Ex.: Coleta emergencial no cliente X"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
       </div>
       {equipe && (
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex flex-col gap-1 md:col-span-3">
           <label htmlFor="ex-resp" className="text-xs font-medium text-slate-600">Responsável</label>
           <select
             id="ex-resp"
             value={responsavelId}
             onChange={(e) => setResponsavelId(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
             {pessoas.map((p) => (
               <option key={p.id} value={p.id}>
@@ -494,7 +497,7 @@ function ExtraForm({
           </select>
         </div>
       )}
-      <div className="flex min-w-0 flex-[1.5] flex-col gap-1">
+      <div className={`flex flex-col gap-1 ${equipe ? "md:col-span-3" : "md:col-span-5"}`}>
         <label htmlFor="ex-obs" className="text-xs font-medium text-slate-600">Observação (opcional)</label>
         <input
           id="ex-obs"
@@ -502,17 +505,17 @@ function ExtraForm({
           value={observacao}
           onChange={(e) => setObservacao(e.target.value)}
           placeholder="Motivo, solicitante, placa…"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
       </div>
       <button
         type="submit"
         disabled={salvando}
-        className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+        className="whitespace-nowrap rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60 md:col-span-2"
       >
         {salvando ? "Salvando…" : "Incluir extra"}
       </button>
-      {erro && <p className="text-sm text-red-600 md:basis-full">{erro}</p>}
+      {erro && <p className="text-sm text-red-600 md:col-span-12">{erro}</p>}
     </form>
   );
 }

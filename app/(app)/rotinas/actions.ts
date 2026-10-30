@@ -142,7 +142,7 @@ export async function excluirExtra(id: string): Promise<RotinaResult> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Configuração das rotinas (Gestor da equipe e Administrador)         */
+/* Configuração das rotinas                                            */
 /* ------------------------------------------------------------------ */
 
 export async function salvarRotina(input: {
@@ -155,9 +155,9 @@ export async function salvarRotina(input: {
   diaMes?: number | null;
   responsavelId: string;
 }): Promise<RotinaResult> {
-  const user = await requireModule("ROTINA", "SUPERVISOR");
+  const user = await requireModule("ROTINA", "EDITOR");
   const escopo = await escopoRotina(user);
-  if (!escopo?.podeGerenciar) return { ok: false, error: "Só o gestor da equipe e o Administrador configuram rotinas." };
+  if (!escopo?.podeIncluir) return { ok: false, error: "Seu acesso permite só visualizar." };
 
   const titulo = texto(input.titulo, 140);
   if (!titulo) return { ok: false, error: "Informe a atividade." };
@@ -173,7 +173,9 @@ export async function salvarRotina(input: {
   const horario = /^\d{2}:\d{2}$/.test(input.horario ?? "") ? input.horario! : null;
 
   const pessoas = await pessoasDoEscopo(escopo);
-  const responsavel = pessoas.find((p) => p.id === input.responsavelId);
+  // O colaborador cadastra só rotinas dele mesmo.
+  const responsavelId = escopo.podeGerenciar ? input.responsavelId : user.id;
+  const responsavel = pessoas.find((p) => p.id === responsavelId);
   if (!responsavel) return { ok: false, error: "Escolha um responsável da sua equipe com acesso às rotinas." };
 
   const dados = {
@@ -187,9 +189,15 @@ export async function salvarRotina(input: {
   };
 
   if (input.id) {
-    const atual = await prisma.rotina.findUnique({ where: { id: input.id }, select: { responsavelId: true } });
+    const atual = await prisma.rotina.findUnique({
+      where: { id: input.id },
+      select: { responsavelId: true, createdById: true },
+    });
     if (!atual) return { ok: false, error: "Rotina não encontrada." };
     if (!noEscopo(escopo, atual.responsavelId)) return { ok: false, error: "Esta rotina não está no seu acesso." };
+    if (!escopo.podeGerenciar && atual.createdById !== user.id) {
+      return { ok: false, error: "Você só edita as rotinas que você mesmo cadastrou. Fale com o seu gestor." };
+    }
     await prisma.rotina.update({ where: { id: input.id }, data: dados });
     await logActivity("ROTINA", `Alterou a rotina "${titulo}" de ${responsavel.nome}`, user.id);
   } else {
@@ -208,7 +216,7 @@ export async function salvarRotina(input: {
 export async function alternarRotina(id: string, ativo: boolean): Promise<RotinaResult> {
   const user = await requireModule("ROTINA", "SUPERVISOR");
   const escopo = await escopoRotina(user);
-  if (!escopo?.podeGerenciar) return { ok: false, error: "Sem permissão." };
+  if (!escopo?.podeGerenciar) return { ok: false, error: "Só o gestor da equipe e o Administrador pausam rotinas." };
 
   const r = await prisma.rotina.findUnique({ where: { id }, select: { responsavelId: true, titulo: true } });
   if (!r) return { ok: false, error: "Rotina não encontrada." };

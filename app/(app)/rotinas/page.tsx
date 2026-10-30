@@ -79,6 +79,7 @@ export default async function RotinasDoDiaPage({
       pessoas={pessoas}
       podeRegistrar={escopo.podeRegistrar}
       podeGerenciar={escopo.podeGerenciar}
+      podeIncluir={escopo.podeIncluir}
       podeExcluir={escopo.podeExcluir}
     />
   );

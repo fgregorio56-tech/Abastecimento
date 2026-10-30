@@ -40,7 +40,7 @@ const LINKS: Record<ModuleKey, NavLink[]> = {
   ROTINA: [
     { href: "/rotinas", label: "Check do dia", exact: true },
     { href: "/rotinas/resumo", label: "Resumo" },
-    { href: "/rotinas/configurar", label: "Configurar rotinas", min: "SUPERVISOR" },
+    { href: "/rotinas/configurar", label: "Configurar rotinas", min: "EDITOR" },
   ],
 };
 

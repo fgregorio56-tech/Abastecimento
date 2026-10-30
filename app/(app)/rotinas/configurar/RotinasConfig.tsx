@@ -16,6 +16,8 @@ export interface RotinaConfig {
   ativo: boolean;
   responsavelId: string;
   responsavel: string;
+  /** Quem cadastrou foi o próprio usuário (o colaborador só edita essas). */
+  criadaPorMim: boolean;
 }
 
 interface Form {
@@ -51,16 +53,21 @@ const label = "text-xs font-medium text-slate-600";
 export function RotinasConfig({
   rotinas,
   pessoas,
+  meuId,
+  podeGerenciar,
   podeExcluir,
 }: {
   rotinas: RotinaConfig[];
   pessoas: { id: string; nome: string }[];
+  meuId: string;
+  /** Gestor/Administrador: editam qualquer rotina do escopo, pausam e transferem. */
+  podeGerenciar: boolean;
   /** Gestor da equipe e Administrador excluem. */
   podeExcluir: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState<Form>({ ...VAZIO, responsavelId: pessoas.length === 1 ? pessoas[0].id : "" });
+  const [form, setForm] = useState<Form>({ ...VAZIO, responsavelId: !podeGerenciar ? meuId : pessoas.length === 1 ? pessoas[0].id : "" });
   const [erro, setErro] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [confirmar, setConfirmar] = useState<string | null>(null);
@@ -103,7 +110,7 @@ export function RotinasConfig({
   }
 
   function limpar() {
-    setForm({ ...VAZIO, responsavelId: pessoas.length === 1 ? pessoas[0].id : "" });
+    setForm({ ...VAZIO, responsavelId: !podeGerenciar ? meuId : pessoas.length === 1 ? pessoas[0].id : "" });
   }
 
   function salvar(e: FormEvent) {
@@ -147,7 +154,13 @@ export function RotinasConfig({
           </div>
           <div className="flex flex-col gap-1">
             <label htmlFor="rf-resp" className={label}>Responsável</label>
-            <select id="rf-resp" value={form.responsavelId} onChange={(e) => set("responsavelId", e.target.value)} className={input}>
+            <select
+              id="rf-resp"
+              value={form.responsavelId}
+              disabled={!podeGerenciar}
+              onChange={(e) => set("responsavelId", e.target.value)}
+              className={`${input} disabled:bg-slate-50 disabled:text-slate-600`}
+            >
               <option value="">Selecione</option>
               {pessoas.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -336,18 +349,22 @@ export function RotinasConfig({
                         </>
                       ) : (
                         <>
-                          <button type="button" onClick={() => editar(r)} className="rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100">
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={() => run(() => alternarRotina(r.id, !r.ativo), r.ativo ? "Rotina pausada." : "Rotina reativada.")}
-                            className="rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
-                          >
-                            {r.ativo ? "Pausar" : "Reativar"}
-                          </button>
-                          {pessoas.length > 1 && (
+                          {(podeGerenciar || r.criadaPorMim) && (
+                            <button type="button" onClick={() => editar(r)} className="rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100">
+                              Editar
+                            </button>
+                          )}
+                          {podeGerenciar && (
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              onClick={() => run(() => alternarRotina(r.id, !r.ativo), r.ativo ? "Rotina pausada." : "Rotina reativada.")}
+                              className="rounded-lg px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                            >
+                              {r.ativo ? "Pausar" : "Reativar"}
+                            </button>
+                          )}
+                          {podeGerenciar && pessoas.length > 1 && (
                             <button
                               type="button"
                               onClick={() => {

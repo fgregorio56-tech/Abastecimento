@@ -15,7 +15,12 @@ export interface EscopoRotina {
   ids: string[] | null;
   /** Pode marcar, desfazer e incluir extras para as pessoas do escopo. */
   podeRegistrar: boolean;
-  /** Pode configurar (cadastrar, editar, pausar) rotinas das pessoas do escopo. */
+  /**
+   * Pode cadastrar rotinas. O colaborador (Incluir e editar) cadastra só para
+   * ele mesmo e edita só as que ele criou; não pausa, não transfere, não exclui.
+   */
+  podeIncluir: boolean;
+  /** Gestor da equipe e Administrador: editam, pausam e transferem rotinas do escopo. */
   podeGerenciar: boolean;
   /** Pode excluir rotinas e extras das pessoas do escopo (Gestor e Administrador). */
   podeExcluir: boolean;
@@ -25,12 +30,12 @@ export async function escopoRotina(user: CurrentUser): Promise<EscopoRotina | nu
   const nivel = levelOf(user, "ROTINA");
   if (!nivel) return null;
 
-  if (nivel === "ADMIN") return { nivel, ids: null, podeRegistrar: true, podeGerenciar: true, podeExcluir: true };
-  if (nivel === "VIEWER") return { nivel, ids: null, podeRegistrar: false, podeGerenciar: false, podeExcluir: false };
-  if (nivel === "EDITOR") return { nivel, ids: [user.id], podeRegistrar: true, podeGerenciar: false, podeExcluir: false };
+  if (nivel === "ADMIN") return { nivel, ids: null, podeRegistrar: true, podeIncluir: true, podeGerenciar: true, podeExcluir: true };
+  if (nivel === "VIEWER") return { nivel, ids: null, podeRegistrar: false, podeIncluir: false, podeGerenciar: false, podeExcluir: false };
+  if (nivel === "EDITOR") return { nivel, ids: [user.id], podeRegistrar: true, podeIncluir: true, podeGerenciar: false, podeExcluir: false };
 
   const equipe = await prisma.user.findMany({ where: { supervisorId: user.id }, select: { id: true } });
-  return { nivel, ids: [user.id, ...equipe.map((u) => u.id)], podeRegistrar: true, podeGerenciar: true, podeExcluir: true };
+  return { nivel, ids: [user.id, ...equipe.map((u) => u.id)], podeRegistrar: true, podeIncluir: true, podeGerenciar: true, podeExcluir: true };
 }
 
 export function noEscopo(escopo: EscopoRotina, userId: string): boolean {

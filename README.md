@@ -14,7 +14,7 @@ consumo, ranking de veículos e metas de média por veículo.
 - **Check de rotina**: cada pessoa marca as rotinas programadas do dia como
   feitas ou não feitas (com motivo e justificativa), inclui atividades extras
   e o gestor acompanha a equipe no Resumo (adesão, motivos, justificativas).
-  Gestores configuram e transferem as rotinas da equipe (dias da semana ou dia do mês).
+  Gestores configuram e transferem as rotinas da equipe (dias da semana ou dia do mês). O colaborador (Incluir e editar) cadastra as próprias rotinas e edita as que criou, mas não pausa, não transfere nem exclui.
 - **Importação**: upload de planilhas `.xlsx`/`.xls`/`.csv` com reconhecimento
   automático de colunas (placa, data, km, litros, valor, posto, combustível,
   motorista, marca, modelo, ano). Veículos novos são criados automaticamente.

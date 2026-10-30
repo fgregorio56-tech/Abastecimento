@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { logActivity } from "@/lib/activityLog";
 
 export interface GoalActionResult {
@@ -11,7 +11,7 @@ export interface GoalActionResult {
 }
 
 export async function setManualGoal(vehicleId: string, value: string): Promise<GoalActionResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "EDITOR");
 
   const metaManual = value === "" ? null : Number(value.replace(",", "."));
   if (metaManual !== null && (!Number.isFinite(metaManual) || metaManual <= 0)) {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
-import { canEditData } from "@/lib/roles";
+import { requireModule } from "@/lib/session";
+import { canEdit as podeEditar, canDelete as podeExcluir } from "@/lib/permissions";
 import type { RowData } from "../abastecimentos/EditableRow";
 import { FuelRecordsTable } from "../abastecimentos/FuelRecordsTable";
 import { VehicleRow, type VehicleRowData } from "../veiculos/VehicleRow";
@@ -15,8 +15,9 @@ export default async function PendenciasPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const user = await requireUser();
-  const canEdit = canEditData(user.role);
+  const user = await requireModule("ABASTECIMENTO");
+  const canEdit = podeEditar(user, "ABASTECIMENTO");
+  const canDelete = podeExcluir(user, "ABASTECIMENTO");
   const params = await searchParams;
   const unidade = typeof params.unidade === "string" ? params.unidade : "";
 
@@ -108,6 +109,7 @@ export default async function PendenciasPage({
             };
           })}
           canEdit={canEdit}
+          canDelete={canDelete}
         />
       </div>
 
@@ -196,7 +198,7 @@ export default async function PendenciasPage({
                   media: null,
                   registros: 0,
                 };
-                return <VehicleRow key={v.id} vehicle={row} canEdit={canEdit} />;
+                return <VehicleRow key={v.id} vehicle={row} canEdit={canEdit} canDelete={canDelete} />;
               })}
             </tbody>
           </table>

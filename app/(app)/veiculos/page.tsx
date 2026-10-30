@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
-import { canEditData, TIPOS_VEICULO_SUGERIDOS } from "@/lib/roles";
+import { requireModule } from "@/lib/session";
+import { TIPOS_VEICULO_SUGERIDOS } from "@/lib/roles";
+import { canEdit as podeEditar, canDelete as podeExcluir } from "@/lib/permissions";
 import { getValidRecordsForMetrics, getVehicleCurrentKm } from "@/lib/data";
 import { computeMetrics } from "@/lib/metrics";
 import { VehicleRow, type VehicleRowData } from "./VehicleRow";
@@ -17,8 +18,9 @@ export default async function VeiculosPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const user = await requireUser();
-  const canEdit = canEditData(user.role);
+  const user = await requireModule("ABASTECIMENTO");
+  const canEdit = podeEditar(user, "ABASTECIMENTO");
+  const canDelete = podeExcluir(user, "ABASTECIMENTO");
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase() : "";
   const unidade = typeof params.unidade === "string" ? params.unidade : "";
@@ -192,7 +194,7 @@ export default async function VeiculosPage({
               </tr>
             )}
             {rows.map((v) => (
-              <VehicleRow key={v.id} vehicle={v} canEdit={canEdit} />
+              <VehicleRow key={v.id} vehicle={v} canEdit={canEdit} canDelete={canDelete} />
             ))}
           </tbody>
         </table>

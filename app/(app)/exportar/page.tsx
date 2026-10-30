@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { parsePeriod } from "@/lib/period";
 import { PeriodFilter } from "../PeriodFilter";
 import { UnitFilter } from "../UnitFilter";
@@ -19,7 +19,7 @@ export default async function ExportarPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireUser();
+  await requireModule("ABASTECIMENTO");
   const params = await searchParams;
   const selectedMonths = parsePeriod(params);
   const somenteCorrigidos = params.somenteCorrigidos === "1";

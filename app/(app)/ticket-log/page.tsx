@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { ACTIVITY_TYPE_LABELS, type ActivityType } from "@/lib/roles";
 import Link from "next/link";
 
@@ -14,6 +14,7 @@ const TYPE_BADGE: Record<ActivityType, string> = {
   META: "bg-violet-100 text-violet-700",
   USUARIO: "bg-slate-200 text-slate-700",
   SISTEMA: "bg-rose-200 text-rose-800",
+  ROTINA: "bg-emerald-100 text-emerald-800",
 };
 
 export default async function TicketLogPage({
@@ -21,7 +22,7 @@ export default async function TicketLogPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireUser();
+  await requireModule("ABASTECIMENTO");
   const params = await searchParams;
   const page = Math.max(1, Number(params.pagina ?? "1") || 1);
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { normalizePlaca, isPlacaValida } from "@/lib/placa";
 import { revalidateVehicleRecords, revalidateUnlinkedRecords } from "@/lib/revalidate";
 import { logActivity } from "@/lib/activityLog";
@@ -35,7 +35,7 @@ export async function updateFuelRecord(
     origem?: string;
   },
 ): Promise<UpdateResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "EDITOR");
 
   const record = await prisma.fuelRecord.findUnique({ where: { id }, select: { vehicleId: true, placaTexto: true } });
   if (!record) return { ok: false, error: "Registro não encontrado." };
@@ -110,7 +110,7 @@ export async function updateFuelRecord(
 }
 
 export async function deleteFuelRecord(id: string): Promise<UpdateResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "SUPERVISOR");
 
   const record = await prisma.fuelRecord.findUnique({ where: { id }, select: { vehicleId: true, placaTexto: true } });
   if (!record) return { ok: false, error: "Registro não encontrado." };
@@ -133,7 +133,7 @@ export interface BulkDeleteResult extends UpdateResult {
 }
 
 export async function deleteMultipleFuelRecords(ids: string[]): Promise<BulkDeleteResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "SUPERVISOR");
 
   if (ids.length === 0) return { ok: false, error: "Nenhum registro selecionado." };
 
@@ -166,7 +166,7 @@ export async function createFuelRecord(input: {
   origem?: string;
   posto?: string;
 }): Promise<UpdateResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "EDITOR");
 
   const placaTexto = normalizePlaca(input.placa);
   if (!placaTexto) return { ok: false, error: "Informe a placa." };
@@ -263,7 +263,7 @@ export async function createFuelRecord(input: {
  * ao salvar (ver computeRecordDeltas).
  */
 export async function getPreviousKmPreview(placa: string, dataISO: string): Promise<{ kmAnterior: number | null }> {
-  await requireRole("MASTER", "EDITOR");
+  await requireModule("ABASTECIMENTO", "EDITOR");
 
   const placaTexto = normalizePlaca(placa);
   if (!isPlacaValida(placaTexto) || !dataISO) return { kmAnterior: null };

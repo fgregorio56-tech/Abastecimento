@@ -22,7 +22,15 @@ export interface VehicleRowData {
   registros: number;
 }
 
-export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canEdit: boolean }) {
+export function VehicleRow({
+  vehicle,
+  canEdit,
+  canDelete = false,
+}: {
+  vehicle: VehicleRowData;
+  canEdit: boolean;
+  canDelete?: boolean;
+}) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -162,13 +170,15 @@ export function VehicleRow({ vehicle, canEdit }: { vehicle: VehicleRowData; canE
             <button onClick={() => setEditing(true)} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
               Editar
             </button>
-            <button
-              onClick={remove}
-              disabled={isPending}
-              className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-            >
-              Excluir
-            </button>
+            {canDelete && (
+              <button
+                onClick={remove}
+                disabled={isPending}
+                className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              >
+                Excluir
+              </button>
+            )}
           </div>
         </td>
       )}

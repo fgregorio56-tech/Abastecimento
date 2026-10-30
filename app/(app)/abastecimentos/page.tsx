@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
-import { canEditData } from "@/lib/roles";
+import { requireModule } from "@/lib/session";
+import { canEdit as podeEditar, canDelete as podeExcluir } from "@/lib/permissions";
 import { parsePeriod } from "@/lib/period";
 import type { RowData } from "./EditableRow";
 import { FuelRecordsTable, type SortLinks } from "./FuelRecordsTable";
@@ -21,7 +21,7 @@ export default async function AbastecimentosPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const user = await requireUser();
+  const user = await requireModule("ABASTECIMENTO");
   const params = await searchParams;
   const somenteErro = params.erro === "1";
   const page = Math.max(1, Number(params.pagina ?? "1") || 1);
@@ -86,7 +86,8 @@ export default async function AbastecimentosPage({
   const deltaMap = computeRecordDeltas(chainRecords);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const canEdit = canEditData(user.role);
+  const canEdit = podeEditar(user, "ABASTECIMENTO");
+  const canDelete = podeExcluir(user, "ABASTECIMENTO");
 
   function baseParams() {
     const sp = new URLSearchParams();
@@ -180,6 +181,7 @@ export default async function AbastecimentosPage({
           };
         })}
         canEdit={canEdit}
+        canDelete={canDelete}
         sortLinks={sortLinks}
         currentSort={currentSort}
         currentDir={currentDir}

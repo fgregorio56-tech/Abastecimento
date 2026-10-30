@@ -1,8 +1,8 @@
-import { requireRole } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { UploadForm } from "./UploadForm";
 
 export default async function ImportarPage() {
-  await requireRole("MASTER", "EDITOR");
+  await requireModule("ABASTECIMENTO", "EDITOR");
 
   return (
     <div className="flex flex-col gap-6">

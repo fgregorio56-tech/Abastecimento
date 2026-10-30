@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { parseWorkbook } from "@/lib/import";
 import { isPlacaValida } from "@/lib/placa";
 import { revalidateVehicleRecords, revalidateUnlinkedRecords } from "@/lib/revalidate";
@@ -15,7 +15,7 @@ export interface ImportState {
 }
 
 export async function processImport(_prevState: ImportState, formData: FormData): Promise<ImportState> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "EDITOR");
 
   const file = formData.get("arquivo");
   if (!(file instanceof File) || file.size === 0) {

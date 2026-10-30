@@ -27,7 +27,7 @@ export function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError("E-mail ou senha inválidos.");
+      setError("Usuário ou senha inválidos.");
       return;
     }
 
@@ -39,11 +39,13 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-slate-700">
-          E-mail
+          E-mail ou usuário
         </label>
         <input
           id="email"
-          type="email"
+          type="text"
+          autoCapitalize="none"
+          autoCorrect="off"
           required
           autoComplete="username"
           value={email}

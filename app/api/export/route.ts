@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/session";
+import { canView } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { buildExportWorkbook } from "@/lib/export";
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+  if (!canView(user, "ABASTECIMENTO")) {
+    return NextResponse.json({ error: "Sem acesso ao módulo Abastecimento." }, { status: 403 });
   }
 
   const months = request.nextUrl.searchParams.getAll("mes");

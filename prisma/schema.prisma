@@ -7,14 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Role: "MASTER" | "EDITOR" | "VIEWER" (ver lib/roles.ts)
+// Role: "MASTER" (Administrador) | "USUARIO" (acesso por módulo) — ver lib/roles.ts
+// Modulos: {"ABASTECIMENTO": "VIEWER" | "EDITOR" | "SUPERVISOR", "ROTINA": ...} — ver lib/permissions.ts
 model User {
   id           String   @id @default(cuid())
   name         String
   email        String   @unique
   passwordHash String
-  role         String   @default("VIEWER")
+  role         String   @default("USUARIO")
+  modulos      Json     @default("{}")
   active       Boolean  @default(true)
+  supervisorId String?
+  supervisor   User?    @relation("Equipe", fields: [supervisorId], references: [id])
+  equipe       User[]   @relation("Equipe")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -23,6 +28,13 @@ model User {
   fuelRecordsCreated FuelRecord[]  @relation("FuelRecordCreatedBy")
   fuelRecordsUpdated FuelRecord[]  @relation("FuelRecordUpdatedBy")
   activityLogs       ActivityLog[]
+
+  rotinas              Rotina[]         @relation("RotinaResponsavel")
+  rotinasCriadas       Rotina[]         @relation("RotinaCriadaPor")
+  registrosResponsavel RotinaRegistro[] @relation("RegistroResponsavel")
+  registrosFeitos      RotinaRegistro[] @relation("RegistroPor")
+  extrasResponsavel    RotinaExtra[]    @relation("ExtraResponsavel")
+  extrasFeitos         RotinaExtra[]    @relation("ExtraPor")
 }
 
 model Vehicle {
@@ -109,4 +121,67 @@ model ActivityLog {
 
   @@index([createdAt])
   @@index([tipo])
+}
+
+// ---------------------------------------------------------------------------
+// Módulo Check de rotina
+// ---------------------------------------------------------------------------
+
+// Frequencia: "SEMANAL" (usa diasSemana, 0 = domingo) | "MENSAL" (usa diaMes)
+model Rotina {
+  id            String   @id @default(cuid())
+  titulo        String
+  local         String?
+  horario       String?
+  frequencia    String   @default("SEMANAL")
+  diasSemana    Int[]
+  diaMes        Int?
+  ativo         Boolean  @default(true)
+  inicio        DateTime @db.Date
+  responsavelId String
+  responsavel   User     @relation("RotinaResponsavel", fields: [responsavelId], references: [id])
+  createdById   String?
+  createdBy     User?    @relation("RotinaCriadaPor", fields: [createdById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  registros RotinaRegistro[]
+
+  @@index([responsavelId])
+}
+
+// Status: "FEITO" | "NAO_FEITO" — uma linha por rotina por dia
+model RotinaRegistro {
+  id              String   @id @default(cuid())
+  rotinaId        String
+  rotina          Rotina   @relation(fields: [rotinaId], references: [id], onDelete: Cascade)
+  data            DateTime @db.Date
+  status          String
+  motivo          String?
+  justificativa   String?
+  responsavelId   String
+  responsavel     User     @relation("RegistroResponsavel", fields: [responsavelId], references: [id])
+  registradoPorId String?
+  registradoPor   User?    @relation("RegistroPor", fields: [registradoPorId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([rotinaId, data])
+  @@index([data])
+  @@index([responsavelId])
+}
+
+model RotinaExtra {
+  id              String   @id @default(cuid())
+  data            DateTime @db.Date
+  descricao       String
+  observacao      String?
+  responsavelId   String
+  responsavel     User     @relation("ExtraResponsavel", fields: [responsavelId], references: [id])
+  registradoPorId String?
+  registradoPor   User?    @relation("ExtraPor", fields: [registradoPorId], references: [id])
+  createdAt       DateTime @default(now())
+
+  @@index([data])
+  @@index([responsavelId])
 }

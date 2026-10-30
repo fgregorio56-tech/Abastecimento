@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
-import { canEditData } from "@/lib/roles";
+import { requireModule } from "@/lib/session";
+import { canEdit as podeEditar } from "@/lib/permissions";
 import { getValidRecordsForMetrics, getVehicleCurrentKm } from "@/lib/data";
 import { computeMetrics } from "@/lib/metrics";
 import { computeGoals } from "@/lib/goals";
@@ -12,8 +12,8 @@ export default async function MetasPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const user = await requireUser();
-  const canEdit = canEditData(user.role);
+  const user = await requireModule("ABASTECIMENTO");
+  const canEdit = podeEditar(user, "ABASTECIMENTO");
   const params = await searchParams;
   const unidade = typeof params.unidade === "string" ? params.unidade : "";
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireModule } from "@/lib/session";
 import { revalidateVehicleRecords, revalidateUnlinkedRecords } from "@/lib/revalidate";
 import { logActivity } from "@/lib/activityLog";
 
@@ -24,7 +24,7 @@ export async function updateVehicle(
     ativo: boolean;
   },
 ): Promise<VehicleUpdateResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "EDITOR");
 
   const capacidade = input.capacidadeTanque ? Number(input.capacidadeTanque.replace(",", ".")) : null;
 
@@ -61,7 +61,7 @@ export async function updateVehicle(
  * corrigindo a placa em cada um).
  */
 export async function deleteVehicle(id: string): Promise<VehicleUpdateResult> {
-  const user = await requireRole("MASTER", "EDITOR");
+  const user = await requireModule("ABASTECIMENTO", "SUPERVISOR");
 
   const vehicle = await prisma.vehicle.findUnique({ where: { id } });
   if (!vehicle) return { ok: false, error: "Veículo não encontrado." };

@@ -39,11 +39,13 @@ function toDateInputValue(iso: string | null): string {
 export function EditableRow({
   row,
   canEdit,
+  canDelete = false,
   selected = false,
   onToggleSelect,
 }: {
   row: RowData;
   canEdit: boolean;
+  canDelete?: boolean;
   selected?: boolean;
   onToggleSelect?: (id: string) => void;
 }) {
@@ -305,13 +307,15 @@ export function EditableRow({
             >
               Editar
             </button>
-            <button
-              onClick={remove}
-              disabled={isPending}
-              className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-            >
-              Excluir
-            </button>
+            {canDelete && (
+              <button
+                onClick={remove}
+                disabled={isPending}
+                className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              >
+                Excluir
+              </button>
+            )}
           </div>
         </td>
       )}

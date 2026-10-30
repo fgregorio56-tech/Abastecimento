@@ -6,8 +6,15 @@ consumo, ranking de veículos e metas de média por veículo.
 
 ## Funcionalidades
 
-- **Usuários e permissões**: um usuário **Mestre** cria e gerencia usuários
-  **Editor** (importa e corrige dados) e **Visualizador** (apenas consulta).
+- **Usuários e acessos por módulo**: o **Administrador** acessa tudo e
+  gerencia os usuários. Para os demais, cada módulo (Abastecimento, Check de
+  rotina) é liberado com um nível: **Visualizar**, **Incluir e editar** ou
+  **Supervisor** (também exclui). Quem não tem o módulo liberado não vê nada
+  dele. O login pode ser um e-mail ou um nome de usuário.
+- **Check de rotina**: cada pessoa marca as rotinas programadas do dia como
+  feitas ou não feitas (com motivo e justificativa), inclui atividades extras
+  e o supervisor acompanha a equipe no Resumo (adesão, motivos, justificativas).
+  Supervisores configuram as rotinas da equipe (dias da semana ou dia do mês).
 - **Importação**: upload de planilhas `.xlsx`/`.xls`/`.csv` com reconhecimento
   automático de colunas (placa, data, km, litros, valor, posto, combustível,
   motorista, marca, modelo, ano). Veículos novos são criados automaticamente.
@@ -81,7 +88,8 @@ gratuito) e cole a connection string fornecida por ele em `DATABASE_URL`.
    - `MASTER_EMAIL`, `MASTER_PASSWORD`, `MASTER_NAME` — credenciais do
      usuário mestre inicial
 4. Clique em **Deploy**.
-5. Depois do primeiro deploy, rode a migração e o seed contra o banco de
+5. As migrações do banco rodam sozinhas a cada deploy de **produção**
+   (`scripts/migrate-on-deploy.mjs`). No primeiro deploy, rode a migração e o seed contra o banco de
    produção (uma única vez), pela sua máquina local com `DATABASE_URL`
    apontando para o Neon:
    ```bash

@@ -1,18 +1,18 @@
-export const ROLES = ["MASTER", "EDITOR", "VIEWER"] as const;
+/**
+ * Perfil geral do usuário. O Administrador ("MASTER") tem acesso total; os
+ * demais ("USUARIO") acessam só os módulos liberados, cada um com o seu nível
+ * (ver lib/permissions.ts).
+ */
+export const ROLES = ["MASTER", "USUARIO"] as const;
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
-  MASTER: "Mestre",
-  EDITOR: "Editor",
-  VIEWER: "Visualizador",
+  MASTER: "Administrador",
+  USUARIO: "Acesso por módulo",
 };
 
 export function canManageUsers(role?: string | null) {
   return role === "MASTER";
-}
-
-export function canEditData(role?: string | null) {
-  return role === "MASTER" || role === "EDITOR";
 }
 
 export const FUEL_TYPES = [
@@ -89,6 +89,7 @@ export const ACTIVITY_TYPES = [
   "META",
   "USUARIO",
   "SISTEMA",
+  "ROTINA",
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
@@ -101,4 +102,5 @@ export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
   META: "Meta",
   USUARIO: "Usuário",
   SISTEMA: "Sistema",
+  ROTINA: "Rotina",
 };

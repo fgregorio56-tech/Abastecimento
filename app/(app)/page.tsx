@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireModule } from "@/lib/session";
 import { getValidRecordsForMetrics, getVehicleCurrentKm } from "@/lib/data";
 import { availableMonths, computeMetrics, computeCivilPeriodTotals } from "@/lib/metrics";
 import { computeGoals } from "@/lib/goals";
@@ -19,6 +20,8 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // Quem não acessa o Abastecimento vai direto para o módulo que tem liberado.
+  await requireModule("ABASTECIMENTO");
   const params = await searchParams;
   const selectedMonths = parsePeriod(params);
   const unidade = typeof params.unidade === "string" ? params.unidade : "";

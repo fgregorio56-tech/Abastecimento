@@ -13,7 +13,7 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: "Credenciais",
       credentials: {
-        email: { label: "E-mail", type: "email" },
+        email: { label: "E-mail ou usuário", type: "text" },
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
@@ -32,7 +32,7 @@ export const authOptions: AuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role as Role,
+          role: (user.role === "MASTER" ? "MASTER" : "USUARIO") as Role,
         };
       },
     }),

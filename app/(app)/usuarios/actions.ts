@@ -4,7 +4,17 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { ROLES, ROLE_LABELS, type Role } from "@/lib/roles";
+import { ROLE_LABELS, type Role } from "@/lib/roles";
+import {
+  LEVELS,
+  LEVEL_LABELS,
+  MODULES,
+  MODULE_LABELS,
+  parseModulos,
+  type Level,
+  type ModuleAccess,
+  type ModuleKey,
+} from "@/lib/permissions";
 import { logActivity } from "@/lib/activityLog";
 
 export interface UserActionResult {
@@ -13,6 +23,38 @@ export interface UserActionResult {
 }
 
 export type CreateUserState = UserActionResult;
+
+const LOGIN_RE = /^[a-z0-9._@-]{3,80}$/;
+
+function parseLevel(value: unknown): Level | null {
+  return typeof value === "string" && (LEVELS as readonly string[]).includes(value) ? (value as Level) : null;
+}
+
+function buildModulos(input: Partial<Record<ModuleKey, string | null | undefined>>): ModuleAccess {
+  const out: ModuleAccess = {};
+  for (const mod of MODULES) {
+    const lvl = parseLevel(input[mod]);
+    if (lvl) out[mod] = lvl;
+  }
+  return out;
+}
+
+function describeAccess(role: Role, modulos: ModuleAccess) {
+  if (role === "MASTER") return ROLE_LABELS.MASTER;
+  const parts = MODULES.filter((m) => modulos[m]).map((m) => `${MODULE_LABELS[m]}: ${LEVEL_LABELS[modulos[m]!]}`);
+  return parts.length ? parts.join(" · ") : "sem módulos";
+}
+
+/** O supervisor escolhido precisa ser Administrador ou Supervisor do módulo Rotinas. */
+async function validSupervisor(supervisorId: string | null, userId?: string): Promise<string | null> {
+  if (!supervisorId) return null;
+  if (userId && supervisorId === userId) throw new Error("A pessoa não pode ser supervisora de si mesma.");
+  const sup = await prisma.user.findUnique({ where: { id: supervisorId }, select: { role: true, modulos: true, active: true } });
+  if (!sup || !sup.active) throw new Error("Supervisor não encontrado.");
+  const ok = sup.role === "MASTER" || parseModulos(sup.modulos).ROTINA === "SUPERVISOR";
+  if (!ok) throw new Error("O supervisor escolhido precisa ter nível Supervisor no módulo Rotinas.");
+  return supervisorId;
+}
 
 export async function createUser(
   _prevState: CreateUserState,
@@ -23,27 +65,78 @@ export async function createUser(
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const role = String(formData.get("role") ?? "VIEWER") as Role;
+  const role: Role = formData.get("role") === "MASTER" ? "MASTER" : "USUARIO";
+  const modulos =
+    role === "MASTER"
+      ? {}
+      : buildModulos({
+          ABASTECIMENTO: String(formData.get("mod_ABASTECIMENTO") ?? ""),
+          ROTINA: String(formData.get("mod_ROTINA") ?? ""),
+        });
 
   if (!name || !email || !password) {
-    return { ok: false, error: "Preencha nome, e-mail e senha." };
+    return { ok: false, error: "Preencha nome, usuário de acesso e senha." };
+  }
+  if (!LOGIN_RE.test(email)) {
+    return { ok: false, error: "O usuário de acesso deve ser um e-mail ou um nome sem espaços (letras, números, ponto, hífen)." };
   }
   if (password.length < 8) {
     return { ok: false, error: "A senha deve ter pelo menos 8 caracteres." };
   }
-  if (!ROLES.includes(role)) {
-    return { ok: false, error: "Perfil inválido." };
+  if (role !== "MASTER" && Object.keys(modulos).length === 0) {
+    return { ok: false, error: "Libere pelo menos um módulo para a pessoa." };
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return { ok: false, error: "Já existe um usuário com esse e-mail." };
+    return { ok: false, error: "Já existe um usuário com esse login." };
+  }
+
+  let supervisorId: string | null;
+  try {
+    supervisorId = await validSupervisor(String(formData.get("supervisorId") ?? "") || null);
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  await prisma.user.create({ data: { name, email, passwordHash, role } });
+  await prisma.user.create({ data: { name, email, passwordHash, role, modulos, supervisorId } });
 
-  await logActivity("USUARIO", `Criou o usuário ${name} (${ROLE_LABELS[role]})`, me.id);
+  await logActivity("USUARIO", `Criou o usuário ${name} (${describeAccess(role, modulos)})`, me.id);
+
+  revalidatePath("/usuarios");
+  revalidatePath("/ticket-log");
+  return { ok: true };
+}
+
+export async function updateUserAccess(
+  userId: string,
+  input: { role: string; modulos: Partial<Record<ModuleKey, string | null>>; supervisorId: string | null },
+): Promise<UserActionResult> {
+  const me = await requireRole("MASTER");
+
+  const role: Role = input.role === "MASTER" ? "MASTER" : "USUARIO";
+  if (me.id === userId && role !== "MASTER") {
+    return { ok: false, error: "Você não pode tirar o seu próprio acesso de administrador." };
+  }
+  const modulos = role === "MASTER" ? {} : buildModulos(input.modulos);
+
+  let supervisorId: string | null;
+  try {
+    supervisorId = await validSupervisor(input.supervisorId || null, userId);
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+
+  const target = await prisma.user.update({ where: { id: userId }, data: { role, modulos, supervisorId } });
+
+  // Quem deixou de ser supervisor das Rotinas não pode continuar como
+  // supervisor de ninguém.
+  if (role !== "MASTER" && modulos.ROTINA !== "SUPERVISOR") {
+    await prisma.user.updateMany({ where: { supervisorId: userId }, data: { supervisorId: null } });
+  }
+
+  await logActivity("USUARIO", `Alterou o acesso de ${target.name}: ${describeAccess(role, modulos)}`, me.id);
 
   revalidatePath("/usuarios");
   revalidatePath("/ticket-log");
@@ -58,23 +151,6 @@ export async function toggleUserActive(userId: string, active: boolean): Promise
 
   const target = await prisma.user.update({ where: { id: userId }, data: { active } });
   await logActivity("USUARIO", `${active ? "Ativou" : "Desativou"} o usuário ${target.name}`, me.id);
-
-  revalidatePath("/usuarios");
-  revalidatePath("/ticket-log");
-  return { ok: true };
-}
-
-export async function changeUserRole(userId: string, role: Role): Promise<UserActionResult> {
-  const me = await requireRole("MASTER");
-  if (me.id === userId) {
-    return { ok: false, error: "Você não pode alterar o próprio perfil." };
-  }
-  if (!ROLES.includes(role)) {
-    return { ok: false, error: "Perfil inválido." };
-  }
-
-  const target = await prisma.user.update({ where: { id: userId }, data: { role } });
-  await logActivity("USUARIO", `Alterou o perfil de ${target.name} para ${ROLE_LABELS[role]}`, me.id);
 
   revalidatePath("/usuarios");
   revalidatePath("/ticket-log");

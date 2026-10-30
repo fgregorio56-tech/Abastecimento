@@ -1,28 +1,10 @@
 import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
 
-export default withAuth(
-  function proxy(req) {
-    const role = req.nextauth.token?.role;
-    const path = req.nextUrl.pathname;
-
-    if (path.startsWith("/usuarios") && role !== "MASTER") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    if (
-      (path.startsWith("/importar") || path.startsWith("/abastecimentos/corrigir")) &&
-      role === "VIEWER"
-    ) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    return NextResponse.next();
-  },
-  {
-    pages: { signIn: "/login" },
-  },
-);
+// Só exige login. O que cada usuário pode ver é decidido em cada página
+// (lib/session.ts → requireModule), lendo as permissões atuais no banco.
+export default withAuth({
+  pages: { signIn: "/login" },
+});
 
 export const config = {
   matcher: [
@@ -35,5 +17,7 @@ export const config = {
     "/metas/:path*",
     "/pendencias/:path*",
     "/ticket-log/:path*",
+    "/rotinas/:path*",
+    "/sem-acesso",
   ],
 };

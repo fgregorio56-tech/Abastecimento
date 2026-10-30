@@ -80,12 +80,15 @@ function SortableTh({
 export function FuelRecordsTable({
   rows,
   canEdit,
+  canDelete = false,
   sortLinks,
   currentSort,
   currentDir,
 }: {
   rows: RowData[];
   canEdit: boolean;
+  /** Excluir fica só com Supervisor do módulo e Administrador. */
+  canDelete?: boolean;
   sortLinks?: SortLinks;
   currentSort?: string;
   currentDir?: "asc" | "desc";
@@ -119,9 +122,9 @@ export function FuelRecordsTable({
     });
   }
 
-  const colSpan = canEdit ? 17 : 15;
+  const colSpan = 15 + (canDelete ? 1 : 0) + (canEdit ? 1 : 0);
   const tableWidth =
-    (canEdit ? COL_WIDTHS.checkbox : 0) +
+    (canDelete ? COL_WIDTHS.checkbox : 0) +
     COL_WIDTHS.placa +
     COL_WIDTHS.data +
     COL_WIDTHS.km +
@@ -141,7 +144,7 @@ export function FuelRecordsTable({
 
   return (
     <div className="max-h-[70vh] overflow-auto rounded-xl border border-brand-100 bg-white">
-      {canEdit && selected.size > 0 && (
+      {canDelete && selected.size > 0 && (
         <div className="flex items-center justify-between border-b border-brand-100 bg-brand-50 px-3 py-2">
           <span className="text-sm font-medium text-brand-800">{selected.size} selecionado(s)</span>
           <div className="flex gap-2">
@@ -163,7 +166,7 @@ export function FuelRecordsTable({
       )}
       <table className="table-fixed text-sm" style={{ width: tableWidth }}>
         <colgroup>
-          {canEdit && <col style={{ width: COL_WIDTHS.checkbox }} />}
+          {canDelete && <col style={{ width: COL_WIDTHS.checkbox }} />}
           <col style={{ width: COL_WIDTHS.placa }} />
           <col style={{ width: COL_WIDTHS.data }} />
           <col style={{ width: COL_WIDTHS.km }} />
@@ -183,7 +186,7 @@ export function FuelRecordsTable({
         </colgroup>
         <thead>
           <tr className="border-b border-brand-100 bg-slate-50 text-left text-sm font-semibold uppercase tracking-wide text-slate-500">
-            {canEdit && (
+            {canDelete && (
               <th className="sticky top-0 z-10 bg-slate-50 px-3 py-2">
                 <input
                   type="checkbox"
@@ -228,8 +231,9 @@ export function FuelRecordsTable({
               key={r.id}
               row={r}
               canEdit={canEdit}
+              canDelete={canDelete}
               selected={selected.has(r.id)}
-              onToggleSelect={canEdit ? toggle : undefined}
+              onToggleSelect={canDelete ? toggle : undefined}
             />
           ))}
         </tbody>

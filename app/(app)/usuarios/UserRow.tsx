@@ -113,7 +113,7 @@ export function UserRow({ user, supervisores }: { user: UserRowData; supervisore
       <td className="px-3 py-2">
         {!isMaster && user.modulos.ROTINA ? (
           <select
-            aria-label={`Supervisor de ${user.name}`}
+            aria-label={`Gestor de ${user.name}`}
             value={user.supervisorId ?? ""}
             disabled={isPending}
             onChange={(e) => saveAccess({ supervisorId: e.target.value || null })}

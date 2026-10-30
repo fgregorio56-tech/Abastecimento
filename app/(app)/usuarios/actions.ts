@@ -45,14 +45,14 @@ function describeAccess(role: Role, modulos: ModuleAccess) {
   return parts.length ? parts.join(" · ") : "sem módulos";
 }
 
-/** O supervisor escolhido precisa ser Administrador ou Supervisor do módulo Rotinas. */
+/** O gestor escolhido precisa ser Administrador ou Gestor da equipe no módulo Rotinas. */
 async function validSupervisor(supervisorId: string | null, userId?: string): Promise<string | null> {
   if (!supervisorId) return null;
-  if (userId && supervisorId === userId) throw new Error("A pessoa não pode ser supervisora de si mesma.");
+  if (userId && supervisorId === userId) throw new Error("A pessoa não pode ser gestora de si mesma.");
   const sup = await prisma.user.findUnique({ where: { id: supervisorId }, select: { role: true, modulos: true, active: true } });
-  if (!sup || !sup.active) throw new Error("Supervisor não encontrado.");
+  if (!sup || !sup.active) throw new Error("Gestor não encontrado.");
   const ok = sup.role === "MASTER" || parseModulos(sup.modulos).ROTINA === "SUPERVISOR";
-  if (!ok) throw new Error("O supervisor escolhido precisa ter nível Supervisor no módulo Rotinas.");
+  if (!ok) throw new Error("O gestor escolhido precisa ter o nível Gestor da equipe no Check de rotina.");
   return supervisorId;
 }
 

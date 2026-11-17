@@ -25,8 +25,19 @@ export const MODULE_LABELS: Record<ModuleKey, string> = {
 
 /** Página inicial de cada módulo. */
 export const MODULE_HOME: Record<ModuleKey, string> = {
-  ABASTECIMENTO: "/",
+  ABASTECIMENTO: "/dashboard",
   ROTINA: "/rotinas",
+};
+
+/** Descrição de cada módulo nos cartões da página inicial (Portal). */
+export const MODULE_DESCRIPTIONS: Record<ModuleKey, string> = {
+  ABASTECIMENTO: "Consumo, quilometragem, veículos, metas e pendências da frota.",
+  ROTINA: "Check diário das atividades da equipe e resumo por período.",
+};
+
+export const MODULE_ICONS: Record<ModuleKey, string> = {
+  ABASTECIMENTO: "⛽",
+  ROTINA: "✅",
 };
 
 export const LEVELS = ["VIEWER", "EDITOR", "SUPERVISOR"] as const;
@@ -96,6 +107,6 @@ export function visibleModules(user: AccessSubject | null | undefined): ModuleKe
 
 /** Para onde mandar o usuário quando ele cai numa página sem acesso. */
 export function homeFor(user: AccessSubject | null | undefined): string {
-  const first = visibleModules(user)[0];
-  return first ? MODULE_HOME[first] : "/sem-acesso";
+  // O Portal (/) lista os módulos liberados; sem nenhum, não há o que mostrar.
+  return visibleModules(user).length > 0 || isAdmin(user) ? "/" : "/sem-acesso";
 }

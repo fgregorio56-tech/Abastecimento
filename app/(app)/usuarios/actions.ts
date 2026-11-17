@@ -206,6 +206,7 @@ export async function wipeDatabase(confirmText: string): Promise<WipeDatabaseRes
   );
 
   revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/abastecimentos");
   revalidatePath("/pendencias");
   revalidatePath("/veiculos");

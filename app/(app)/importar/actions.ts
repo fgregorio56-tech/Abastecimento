@@ -111,6 +111,7 @@ export async function processImport(_prevState: ImportState, formData: FormData)
   );
 
   revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/abastecimentos");
   revalidatePath("/veiculos");
   revalidatePath("/pendencias");

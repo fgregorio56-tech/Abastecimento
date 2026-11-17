@@ -47,6 +47,7 @@ export async function updateVehicle(
 
   revalidatePath("/veiculos");
   revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/metas");
   revalidatePath("/pendencias");
   revalidatePath("/ticket-log");
@@ -72,6 +73,7 @@ export async function deleteVehicle(id: string): Promise<VehicleUpdateResult> {
 
   revalidatePath("/veiculos");
   revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/metas");
   revalidatePath("/pendencias");
   revalidatePath("/ticket-log");

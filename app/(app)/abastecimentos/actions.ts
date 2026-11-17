@@ -18,6 +18,7 @@ function revalidateAbastecimentoPaths() {
   revalidatePath("/pendencias");
   revalidatePath("/ticket-log");
   revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/veiculos");
 }
 

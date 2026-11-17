@@ -28,7 +28,7 @@ interface NavLink {
 
 const LINKS: Record<ModuleKey, NavLink[]> = {
   ABASTECIMENTO: [
-    { href: "/", label: "Visão geral", exact: true },
+    { href: "/dashboard", label: "Visão geral", exact: true },
     { href: "/abastecimentos", label: "Abastecimentos" },
     { href: "/veiculos", label: "Veículos" },
     { href: "/pendencias", label: "Pendências", badge: "pendencias" },
@@ -42,11 +42,6 @@ const LINKS: Record<ModuleKey, NavLink[]> = {
     { href: "/rotinas/resumo", label: "Resumo" },
     { href: "/rotinas/configurar", label: "Configurar rotinas", min: "SUPERVISOR" },
   ],
-};
-
-const SUBTITLE: Record<ModuleKey, string> = {
-  ABASTECIMENTO: "controle de consumo & quilometragem",
-  ROTINA: "check diário das atividades da equipe",
 };
 
 function moduleOfPath(path: string): ModuleKey | null {
@@ -70,8 +65,13 @@ export function NavBar({
   const [open, setOpen] = useState(false);
   const isAdmin = user.role === "MASTER";
 
+  const onPortal = pathname === "/";
   const current = moduleOfPath(pathname);
-  const active: ModuleKey | null = current && modules.includes(current) ? current : (modules[0] ?? null);
+  const active: ModuleKey | null = onPortal
+    ? null
+    : current && modules.includes(current)
+      ? current
+      : (modules[0] ?? null);
 
   const links: NavLink[] = active
     ? LINKS[active].filter((l) => {
@@ -95,20 +95,12 @@ export function NavBar({
     <header className="border-b border-brand-100 bg-white">
       <div className="mx-auto flex w-full max-w-[1800px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
-          <div className="leading-tight">
+          <Link href="/" className="leading-tight">
             <span className="text-lg font-extrabold tracking-tight text-slate-900">
-              {active === "ROTINA" ? (
-                <>
-                  Check de <span className="text-brand-600">Rotina</span>
-                </>
-              ) : (
-                <>
-                  Controle de <span className="text-brand-600">Abastecimento</span>
-                </>
-              )}
+              Portal <span className="text-brand-600">Retec</span>
             </span>
-            <p className="hidden text-xs text-slate-400 sm:block">{active ? SUBTITLE[active] : "central da operação"}</p>
-          </div>
+            <p className="hidden text-xs text-slate-400 sm:block">Gestão e Análise</p>
+          </Link>
           <LogoBadge />
         </div>
 
@@ -133,8 +125,19 @@ export function NavBar({
         </div>
       </div>
 
-      {modules.length > 1 && (
-        <div className="mx-auto flex w-full max-w-[1800px] gap-1 px-4 pb-2 sm:px-6 lg:px-8" role="tablist" aria-label="Módulos">
+      <div className="mx-auto flex w-full max-w-[1800px] gap-1 overflow-x-auto px-4 pb-2 sm:px-6 lg:px-8" role="tablist" aria-label="Módulos">
+          <Link
+            href="/"
+            role="tab"
+            aria-selected={onPortal}
+            className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              onPortal
+                ? "border-brand-600 bg-brand-50 text-brand-800"
+                : "border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700"
+            }`}
+          >
+            Início
+          </Link>
           {modules.map((m) => (
             <Link
               key={m}
@@ -151,7 +154,6 @@ export function NavBar({
             </Link>
           ))}
         </div>
-      )}
 
       <nav className="hidden gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 sm:px-6 lg:flex lg:px-8">
         {links.map((link) => {

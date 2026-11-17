@@ -13,10 +13,10 @@ export default function LoginPage() {
         </div>
 
         <h1 className="text-center text-xl font-bold text-slate-900">
-          Controle de <span className="text-brand-600">Abastecimento</span>
+          Portal <span className="text-brand-600">Retec</span>
         </h1>
         <p className="mt-1 text-center text-sm text-slate-500">
-          Gestão e análise de abastecimentos da frota
+          Gestão e Análise
         </p>
         <div className="mt-6">
           <Suspense fallback={null}>

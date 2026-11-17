@@ -35,6 +35,8 @@ model User {
   registrosFeitos      RotinaRegistro[] @relation("RegistroPor")
   extrasResponsavel    RotinaExtra[]    @relation("ExtraResponsavel")
   extrasFeitos         RotinaExtra[]    @relation("ExtraPor")
+
+  planejamento Planejamento?
 }
 
 model Vehicle {
@@ -184,4 +186,17 @@ model RotinaExtra {
 
   @@index([data])
   @@index([responsavelId])
+}
+
+// ---------------------------------------------------------------------------
+// Módulo Meu planejamento
+// ---------------------------------------------------------------------------
+
+// Um registro por usuário com o estado inteiro do planejamento (config,
+// projetos, aportes, parcelas) — o mesmo formato do backup .json do módulo.
+model Planejamento {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dados     Json
+  updatedAt DateTime @updatedAt
 }

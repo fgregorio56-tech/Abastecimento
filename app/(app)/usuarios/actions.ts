@@ -72,6 +72,7 @@ export async function createUser(
       : buildModulos({
           ABASTECIMENTO: String(formData.get("mod_ABASTECIMENTO") ?? ""),
           ROTINA: String(formData.get("mod_ROTINA") ?? ""),
+          PLANEJAMENTO: String(formData.get("mod_PLANEJAMENTO") ?? ""),
         });
 
   if (!name || !email || !password) {

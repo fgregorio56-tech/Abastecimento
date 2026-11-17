@@ -42,10 +42,14 @@ const LINKS: Record<ModuleKey, NavLink[]> = {
     { href: "/rotinas/resumo", label: "Resumo" },
     { href: "/rotinas/configurar", label: "Configurar rotinas", min: "SUPERVISOR" },
   ],
+  PLANEJAMENTO: [
+    { href: "/planejamento", label: "Meu planejamento", exact: true },
+  ],
 };
 
 function moduleOfPath(path: string): ModuleKey | null {
   if (path.startsWith("/rotinas")) return "ROTINA";
+  if (path.startsWith("/planejamento")) return "PLANEJAMENTO";
   if (path.startsWith("/usuarios") || path.startsWith("/sem-acesso")) return null;
   return "ABASTECIMENTO";
 }

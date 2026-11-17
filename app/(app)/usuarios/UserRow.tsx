@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { resetUserPassword, toggleUserActive, updateUserAccess } from "./actions";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
-import { LEVELS, levelLabel, MODULES, type ModuleAccess, type ModuleKey } from "@/lib/permissions";
+import { levelsFor, levelLabel, MODULES, type ModuleAccess, type ModuleKey } from "@/lib/permissions";
 
 export interface SupervisorOption {
   id: string;
@@ -101,7 +101,7 @@ export function UserRow({ user, supervisores }: { user: UserRowData; supervisore
               className={`${selectCls} ${user.modulos[m] ? "" : "text-slate-400"}`}
             >
               <option value="">Sem acesso</option>
-              {LEVELS.map((l) => (
+              {levelsFor(m).map((l) => (
                 <option key={l} value={l}>
                   {levelLabel(m, l)}
                 </option>

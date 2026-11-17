@@ -24,6 +24,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         levels={{
           ABASTECIMENTO: isAdmin(user) ? "ADMIN" : (user.modulos.ABASTECIMENTO ?? null),
           ROTINA: isAdmin(user) ? "ADMIN" : (user.modulos.ROTINA ?? null),
+          PLANEJAMENTO: isAdmin(user) ? "ADMIN" : (user.modulos.PLANEJAMENTO ?? null),
         }}
         pendenciasCount={errorCount + incompleteVehicleCount}
       />

@@ -15,29 +15,33 @@
  * componentes de servidor quanto de cliente.
  */
 
-export const MODULES = ["ABASTECIMENTO", "ROTINA"] as const;
+export const MODULES = ["ABASTECIMENTO", "ROTINA", "PLANEJAMENTO"] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 export const MODULE_LABELS: Record<ModuleKey, string> = {
   ABASTECIMENTO: "Abastecimento",
   ROTINA: "Check de rotina",
+  PLANEJAMENTO: "Meu planejamento",
 };
 
 /** Página inicial de cada módulo. */
 export const MODULE_HOME: Record<ModuleKey, string> = {
   ABASTECIMENTO: "/dashboard",
   ROTINA: "/rotinas",
+  PLANEJAMENTO: "/planejamento",
 };
 
 /** Descrição de cada módulo nos cartões da página inicial (Portal). */
 export const MODULE_DESCRIPTIONS: Record<ModuleKey, string> = {
   ABASTECIMENTO: "Consumo, quilometragem, veículos, metas e pendências da frota.",
   ROTINA: "Check diário das atividades da equipe e resumo por período.",
+  PLANEJAMENTO: "Metas, projetos e aportes de cada pessoa. Cada um vê e edita só o seu.",
 };
 
 export const MODULE_ICONS: Record<ModuleKey, string> = {
   ABASTECIMENTO: "⛽",
   ROTINA: "✅",
+  PLANEJAMENTO: "🎯",
 };
 
 export const LEVELS = ["VIEWER", "EDITOR", "SUPERVISOR"] as const;
@@ -52,7 +56,17 @@ export const LEVEL_LABELS: Record<Level, string> = {
 /** Rótulo do nível dentro de um módulo (o Supervisor só exclui no Abastecimento). */
 export function levelLabel(m: ModuleKey, l: Level): string {
   if (l === "SUPERVISOR" && m === "ROTINA") return "Supervisor (equipe)";
+  if (m === "PLANEJAMENTO") return "Acesso ao próprio planejamento";
   return LEVEL_LABELS[l];
+}
+
+/**
+ * Níveis oferecidos na tela de usuários. No Meu planejamento só há um: quem
+ * tem acesso inclui, edita e exclui o próprio planejamento; o Administrador vê
+ * e edita o de todos.
+ */
+export function levelsFor(m: ModuleKey): readonly Level[] {
+  return m === "PLANEJAMENTO" ? ["EDITOR"] : LEVELS;
 }
 
 /** Nível efetivo: o Administrador fica acima de todos. */
